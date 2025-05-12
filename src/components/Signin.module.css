@@ -1,0 +1,120 @@
+@import url(http://fonts.googleapis.com/earlyaccess/notosanskr.css);
+
+
+.container {
+  position: absolute;
+  top: 20%;
+  right: 10%;
+}
+
+.background {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 40px 30px -20px #0000004d;
+  padding: 0px;
+  text-align: center;
+  width: 30vw;
+  height: auto;
+  opacity: 0.8;
+  overflow: auto;
+}
+
+.form {
+  display: flex;
+  padding: 10px;
+  flex-direction: column;
+}
+
+.loginID {
+  border: none;
+  border-bottom: 2px solid #D1D1D4;
+  padding: 10px;
+  font-weight: 700;
+  width: 60%;
+  margin-left: 5%;
+}
+
+.loginPW {
+  border: none;
+  border-bottom: 2px solid #D1D1D4;
+  padding: 10px;
+  font-weight: 700;
+  width: 75%;
+}
+
+.IDchk{
+  margin: 0 3%;
+}
+
+.nameWrapper {
+  display: flex;
+  justify-content: space-between;
+  width: 75%;     
+  margin: 0 auto; 
+}
+
+.nameWrapper p {
+  width: 44%;     
+  margin: 16px -5px;
+}
+
+
+.name {
+  width: 95%;
+  border: none;
+  border-bottom: 2px solid #D1D1D4;
+  padding: 10px;
+  font-weight: 700;
+  margin-left: -2%;
+}
+
+.success{
+  color: green;
+  font-size: 0.8em;
+  text-align: left;
+  padding-left: 13%;
+  margin-top: -17px;
+  margin-bottom: 5px;
+}
+
+.warning{
+  color: red;
+  font-size: 0.8em;
+  text-align: left;
+  padding-left: 13%;
+  margin-top: -17px;
+  margin-bottom: 5px;
+}
+
+
+
+
+.login:active,
+.login:focus,
+.login:hover,
+.name:active,
+.name:focus,
+.name:hover {
+  outline: none;
+  border-bottom-color: rgb(68, 112, 67);
+}
+
+.btn {
+  border: none;
+  width: 75%;
+  background-color: rgb(68, 112, 67);
+  color: white;
+  padding: 15px 0;
+  font-weight: 600;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.btn:hover {
+  background-color: rgb(49, 82, 48);
+}
+
+button{
+  margin: 0 5px;
+}
