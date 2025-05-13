@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useEffect } from 'react';
 import Login from './components/Login';
 import Signin from './components/Signin';
+import Main from './components/Main';
 
 
 function App() {
@@ -17,20 +18,21 @@ function App() {
           setMode("WELCOME");
         }
         else {
-          setMode("LOGIN");
+          // setMode("LOGIN"); 잠깐 보류류
+          setMode("MAIN");
         }
       });
   }, []); 
 
   let content = null;  
 
-  if(mode==="LOGIN"){
+  if(mode==='MAIN'){
+    content = <Main setMode={setMode}></Main> 
+  } else if (mode === 'LOGIN') {
     content = <Login setMode={setMode}></Login> 
-  }
-  else if (mode === 'SIGNIN') {
+  } else if (mode === 'SIGNIN') {
     content = <Signin setMode={setMode}></Signin> 
-  }
-  else if (mode === 'WELCOME') {
+  } else if (mode === 'WELCOME') {
     content = 
     <>
       <div className={styles.container}>

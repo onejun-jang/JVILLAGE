@@ -104,7 +104,6 @@ app.post("/signin/check", (req, res) => {
 app.post("/signin", (req, res) => {  
     const username = req.body.userId;
     const password = req.body.userPassword;
-    const password2 = req.body.userPassword2;
     const lastnameKanji = req.body.lastnameKanji;
     const firstnameKanji = req.body.firstnameKanji;
     const lastnameKana = req.body.lastnameKana;

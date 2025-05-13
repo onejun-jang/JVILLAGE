@@ -72,7 +72,7 @@
   color: green;
   font-size: 0.8em;
   text-align: left;
-  padding-left: 13%;
+  padding-left: 12%;
   margin-top: -17px;
   margin-bottom: 5px;
 }
@@ -81,7 +81,7 @@
   color: red;
   font-size: 0.8em;
   text-align: left;
-  padding-left: 13%;
+  padding-left: 12%;
   margin-top: -17px;
   margin-bottom: 5px;
 }
@@ -94,7 +94,13 @@
 .login:hover,
 .name:active,
 .name:focus,
-.name:hover {
+.name:hover,
+.loginID:hover,
+.loginID:active,
+.loginID:focus,
+.loginPW:hover,
+.loginPW:active,
+.loginPW:focus {
   outline: none;
   border-bottom-color: rgb(68, 112, 67);
 }
