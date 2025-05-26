@@ -1,0 +1,72 @@
+.priceTableWrapper {
+    overflow-x: auto;
+    font-size: 14px;
+  }
+  
+.priceTable {
+  width: 60%;
+  border-collapse: collapse;
+  font-size: clamp(10px,1.5vh,20px);
+  min-width: 600px;
+  margin: 0 auto;
+}
+
+th{
+  height: 5vh;
+  border-bottom: 2px double 	#d3d3d3;
+}
+
+
+th.jvillageCell{
+  border-radius: 10px 10px 0 0;
+  height: 5vh;
+  border-bottom: 2px double white;
+  
+}
+
+tr:nth-child(n+1):nth-child(-n+4) td {
+  border-bottom: 1px solid 	#d3d3d3;
+  border-left: none;
+}
+
+tr:nth-child(n+1):nth-child(-n+4) td.jvillageCell{
+  border-bottom: 1px solid 	white;
+  border-left: none;
+}
+
+tr:last-child td.jvillageCell {
+  border-radius: 0 0 10px 10px;
+}
+
+.jvillageCell{
+  font-size: clamp(10px,2vh,120px);
+    font-weight: 700;
+    background-color: red;
+    color: white;
+    width:clamp(40px,1vh,120px);
+    box-shadow: 2px 4px 6px gray;
+}
+
+.rowTitle{
+  width: clamp(40px,1vh,120px);
+  font-weight: 600;
+}
+
+th.rowTitle {
+   border-bottom: 2px double #d3d3d3;
+}
+
+
+th.nvillage,
+td.nvillage{
+  height: 4vh;
+  /* width:100px; */
+  width:clamp(40px,0.8vh,100px)
+}
+
+.note{
+  margin-top: 15px;
+  font-size: 12px;
+  /* text-align: left; */
+}
+

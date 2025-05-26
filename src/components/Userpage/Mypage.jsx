@@ -1,0 +1,59 @@
+import styles from './Mypage.module.css';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Reservation from './Reservation';
+
+function Mypage({ setIsLogin }) {
+  const [userName, setUserName] = useState('遥');
+  const [activeTab, setActiveTab] = useState('reservation'); 
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetch('/getUsername',{
+        credentials: 'include'
+    })
+      .then(res => res.json())
+      .then(data => {
+        setUserName(data.username || '？？？');
+      });
+  }, []);
+
+  const handleLogout = () => {
+    fetch('/logout', {
+        credentials: 'include'
+    })
+      .then(() => {
+        setIsLogin(false);
+        navigate('/login');
+      });
+  };
+
+  return (
+    <div className={styles.wrapper}>
+      <div className={styles.header}>
+        <div className={styles.welcome}>
+          {userName}様, 안녕하세요!
+        </div>
+        <button className={styles.logoutBtn} onClick={handleLogout}>
+          ログアウト
+        </button>
+      </div>
+
+      <div className={styles.container}>
+        <div className={styles.sidebar}>
+          <button onClick={() => setActiveTab('reservation')}>予約管理</button>
+          <button onClick={() => setActiveTab('ticket')}>回数券管理</button>
+          <button onClick={() => setActiveTab('profile')}>個人情報修正</button>
+        </div>
+
+        <div className={styles.content}>
+          {activeTab === 'reservation' && <Reservation />}
+          {activeTab === 'ticket' && <div>수강권관리 내용</div>}
+          {activeTab === 'profile' && <div>개인정보수정 내용</div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Mypage;

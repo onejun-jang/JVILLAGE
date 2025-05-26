@@ -1,10 +1,12 @@
 const express = require('express')
+const cors = require('cors')
 const session = require('express-session')
 const path = require('path');
+const dayjs = require('dayjs');
 const app = express()
 const port = 3001
 
-const db = require('./lib/db');
+const db = require('./lib/db'); // mysql2/promise 기반
 const sessionOption = require('./lib/sessionOption');
 const bodyParser = require("body-parser");
 const bcrypt = require('bcrypt');
@@ -16,147 +18,347 @@ app.use(bodyParser.json());
 var MySQLStore = require('express-mysql-session')(session);
 var sessionStore = new MySQLStore(sessionOption);
 app.use(session({  
-	key: 'session_cookie_name',
-    secret: '~',
-	store: sessionStore,
-	resave: false,
-	saveUninitialized: false
+  key: 'session_cookie_name',
+  secret: '~',
+  store: sessionStore,
+  resave: false,
+  saveUninitialized: false,
+    cookie: {
+    httpOnly: true,
+    secure: false,  // HTTPS가 아니라면 false
+    sameSite: 'lax', // 또는 'strict'
+    maxAge: 1000 * 60 * 60 * 24 
+  }
 }))
 
-// app.get('/', (req, res) => {    
-//     res.sendFile(path.join(__dirname, '/build/index.html'));
-// })
+app.use(cors({
+  origin: 'http://localhost:3000', 
+  credentials: true,                // 세션 쿠키 주고받을 때 필요
+}));
 
 app.get('/authcheck', (req, res) => {      
-    const sendData = { isLogin: "" };
-    if (req.session.is_logined) {
-        sendData.isLogin = "True"
-    } else {
-        sendData.isLogin = "False"
-    }
-    res.send(sendData);
+  const sendData = { isLogin: "" };
+  if (req.session.is_logined) {
+    sendData.isLogin = "True"
+  } else {
+    sendData.isLogin = "False"
+  }
+  res.send(sendData);
 })
 
 app.get('/logout', function (req, res) {
-    req.session.destroy(function (err) {
-        res.redirect('/');
-    });
+  req.session.destroy(function (err) {
+    res.redirect('/');
+  });
 });
 
-app.post("/login", (req, res) => { // 데이터 받아서 결과 전송
-    const username = req.body.userId;
-    const password = req.body.userPassword;
-    const sendData = { isLogin: "" };
+app.post("/login", async (req, res) => { // async 붙임(프로미스처리타입)
+  const username = req.body.userId;
+  const password = req.body.userPassword;
+  const sendData = { isLogin: "" };
 
-    if (username && password) {             // id와 pw가 입력되었는지 확인
-        db.query('SELECT * FROM userTable WHERE username = ?', [username], function (error, results, fields) {
-            if (error) throw error;
-                if (results.length > 0) {       // db에서의 반환값이 있다 = 일치하는 아이디가 있다.      
+  if (!username || !password) {
+    sendData.isLogin = "ID及びパスワードを入力してください。";
+    return res.send(sendData);
+  }
 
-                bcrypt.compare(password , results[0].password, (err, result) => {    // 입력된 비밀번호가 해시된 저장값과 같은 값인지 비교
-
-                    if (result === true) {                  // 비밀번호가 일치하면
-                        req.session.is_logined = true;      // 세션 정보 갱신
-                        req.session.nickname = username;
-                        req.session.save(function () {
-                            sendData.isLogin = "True"
-                            res.send(sendData);
-                        });
-                        db.query(`INSERT INTO logtable (created, username, action, command, actiondetail) VALUES (NOW(), ?, 'login' , ?, ?)`
-                            , [req.session.nickname, '-', `React 로그인 테스트`], function (error, result) { });
-                    }
-                    else{                                   // 비밀번호가 다른 경우
-                        sendData.isLogin = "로그인 정보가 일치하지 않습니다."
-                        res.send(sendData);
-                    }
-                })                      
-                } else {    // db에 해당 아이디가 없는 경우
-                    sendData.isLogin = "아이디 정보가 일치하지 않습니다."
-                    res.send(sendData);
-            }
+  try {
+    const [results] = await db.query('SELECT * FROM userTable WHERE username = ?', [username]);
+    if (results.length > 0) {
+      const user = results[0];
+      const match = await bcrypt.compare(password, user.password);
+      if (match) {
+        req.session.is_logined = true;
+        req.session.nickname = username;
+        req.session.save(() => {
+          sendData.isLogin = "True";
+          res.send(sendData);
         });
-    } else {            // 아이디, 비밀번호 중 입력되지 않은 값이 있는 경우
-        sendData.isLogin = "아이디와 비밀번호를 입력하세요!"
+
+        // 로그 기록은 에러 무시하고 비동기 실행
+        db.query(
+          `INSERT INTO logtable (created, username, action, command, actiondetail) VALUES (NOW(), ?, 'login', ?, ?)`,
+          [username, '-', `React 로그인 테스트`]
+        ).catch(console.error);
+
+      } else {
+        sendData.isLogin = "ログイン情報が一致していません。";
         res.send(sendData);
-    }
-});
-
-app.post("/signin/check", (req, res) => {
-    const username = req.body.userId;
-    const sendData = { isIDcheck: "" };
-
-    db.query('SELECT * FROM userTable WHERE username = ?', [username], function(error, results, fields) { 
-        if (error) throw error;
-        
-        if (results.length <= 0) {
-            sendData.isIDcheck = "True"
-            res.send(sendData);        
-            
-        } else {                                                              
-            sendData.isIDcheck = "既に存在するIDです。"
-            res.send(sendData);  
-          }    
-    
-    });
-
-});
-
-app.post("/signin", (req, res) => {  
-    const username = req.body.userId;
-    const password = req.body.userPassword;
-    const lastnameKanji = req.body.lastnameKanji;
-    const firstnameKanji = req.body.firstnameKanji;
-    const lastnameKana = req.body.lastnameKana;
-    const firstnameKana = req.body.firstnameKana;
-    const idavailable = req.body.idavailable;
-    const pwavailable = req.body.pwavailable;
-    
-    const sendData = { isSuccess: "" };
-
-    if (!username) {
-        sendData.isSuccess = "IDを入力してください。"
-        res.send(sendData);  
-    } else if (!password) {
-        sendData.isSuccess = "パスワードを入力してください。"
-        res.send(sendData);  
-    } else if(!lastnameKanji || !firstnameKanji || !lastnameKana || !firstnameKana) {
-        sendData.isSuccess = "氏名を確認してください。"
-        res.send(sendData);
+      }
     } else {
-        db.query('SELECT * FROM userTable WHERE username = ?', [username], function(error, results, fields) { 
-            if (error) throw error;
-            
-            if (idavailable && pwavailable) {         
-                const hasedPassword = bcrypt.hashSync(password, 10);             
-                    db.query('INSERT INTO userTable (username, password, lastnameKanji, firstnameKanji, lastnameKana, firstnameKana) VALUES (?, ?, ?, ?, ?, ?)', 
-                        [username, hasedPassword, lastnameKanji, firstnameKanji, lastnameKana, firstnameKana],
-                        function (error, data) {
-                            if (error) throw error;
-                            req.session.save(function () {                        
-                                sendData.isSuccess = "True"
-                                res.send(sendData);
-                            });
-                        });
-            } else if(!idavailable){
-                if(idavailable === false){
-                    sendData.isSuccess = "既に存在するIDです。"
-                    res.send(sendData);  
-                }                                                              
-                else if(idavailable === null){
-                    sendData.isSuccess = "IDCheckを押してください。"
-                    res.send(sendData);  
-                }
-            }
-            　else {                                                              
-                sendData.isSuccess = "パスワードを確認してください。"
-                res.send(sendData);  
-              }
-        
-        });
+      sendData.isLogin = "存在しないIDです。";
+      res.send(sendData);
     }
- });            
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: '서버 오류' });
+  }
+});
+
+app.post("/signin/check", async (req, res) => {
+  const username = req.body.userId;
+  const sendData = { isIDcheck: "" };
+
+  try {
+    const [results] = await db.query('SELECT * FROM userTable WHERE username = ?', [username]);
+    if (results.length <= 0) {
+      sendData.isIDcheck = "True"
+    } else {                                                              
+      sendData.isIDcheck = "既に存在するIDです。"
+    }
+    res.send(sendData);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: '서버 오류' });
+  }
+});
+
+app.post("/signin", async (req, res) => {  
+  const username = req.body.userId;
+  const password = req.body.userPassword;
+  const lastnameKanji = req.body.lastnameKanji;
+  const firstnameKanji = req.body.firstnameKanji;
+  const lastnameKana = req.body.lastnameKana;
+  const firstnameKana = req.body.firstnameKana;
+  const idavailable = req.body.idavailable;
+  const pwavailable = req.body.pwavailable;
+  
+  const sendData = { isSuccess: "" };
+
+  if (!username) {
+    sendData.isSuccess = "IDを入力してください。"
+    return res.send(sendData);
+  } 
+  if (!password) {
+    sendData.isSuccess = "パスワードを入力してください。"
+    return res.send(sendData);
+  } 
+  if (!lastnameKanji || !firstnameKanji || !lastnameKana || !firstnameKana) {
+    sendData.isSuccess = "氏名を確認してください。"
+    return res.send(sendData);
+  }
+
+  try {
+    const [results] = await db.query('SELECT * FROM userTable WHERE username = ?', [username]);
+
+    if (idavailable && pwavailable) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await db.query(
+        'INSERT INTO userTable (username, password, lastnameKanji, firstnameKanji, lastnameKana, firstnameKana) VALUES (?, ?, ?, ?, ?, ?)', 
+        [username, hashedPassword, lastnameKanji, firstnameKanji, lastnameKana, firstnameKana]
+      );
+      await new Promise((resolve) => req.session.save(resolve)); // 세션 저장 대기
+      sendData.isSuccess = "True";
+      res.send(sendData);
+
+    } else if (!idavailable) {
+      if (idavailable === false) {
+        sendData.isSuccess = "既に存在するIDです。"
+      } else if (idavailable === null) {
+        sendData.isSuccess = "IDCheckを押してください。"
+      }
+      res.send(sendData);
+    } else {
+      sendData.isSuccess = "パスワードを確認してください。"
+      res.send(sendData);
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: '서버 오류' });
+  }
+});
+
+app.get('/getAvailabilityTable', async (req, res) => {
+  const today = new Date();
+  const timeSlots = [
+    '10:00', '10:30', '11:00', '11:30', '12:00', '12:30',
+    '13:00', '13:30', '14:00', '14:30', '15:00', '15:30',
+    '16:00', '16:30', '17:00', '17:30', '18:00', '18:30',
+    '19:00', '19:30', '20:00', '20:30'
+  ];
+
+ 
+  const dates = [];
+  for (let i = 1; i < 15; i++) {
+    const date = new Date(today);
+    // console.log("date:", date);
+    date.setDate(today.getDate() + i);
+    dates.push(date.toISOString().split('T')[0]);
+    // console.log("dates:", dates);
+  }
+
+  const placeholders = dates.map(() => '?').join(',');
+  const sql = `SELECT date, time FROM reservations WHERE date IN (${placeholders})`;
+
+  try {
+    const [rows] = await db.query(sql, dates);
+    const convertedRows = rows.map(r => {
+  const localDate = new Date(r.date);
+  localDate.setHours(localDate.getHours() + 9); // UTC → JST
+  return {
+    ...r,
+    date: localDate.toISOString().split('T')[0], // JST 기준 날짜
+  };
+});
+
+    const reservedSet = new Set(convertedRows.map(r => `${r.date}_${r.time}`));
+
+    const result = [];
+    dates.forEach(date => {
+      timeSlots.forEach(time => {
+        const key = `${date}_${time}`;
+        result.push({
+          date,
+          time,
+          isAvailable: !reservedSet.has(key)
+        });
+      });
+    });
+
+    res.json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'DB 조회 중 오류 발생' });
+  }
+});
+
+app.post('/reserve', async (req, res) => {
+  const slots = req.body.slots; 
+  const username = req.session.nickname;
+
+  if (!username) {
+    return res.status(401).json({ success: false, message: 'ログインしてください。' });
+  }
+
+  if (!Array.isArray(slots) || slots.length === 0) {
+    return res.status(400).json({ success: false, message: '予約の時間帯を選択して下さい。' });
+  }
+
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    for (const slot of slots) {
+      const [rows] = await connection.query(
+        'SELECT * FROM reservations WHERE date = ? AND time = ?',
+        [slot.date, slot.time]
+      );
+      if (rows.length > 0) {
+        throw new Error(`${slot.date} ${slot.time} 은 이미 예약되었습니다.`);
+      }
+
+      await connection.query(
+        'INSERT INTO reservations (username, date, time) VALUES (?, ?, ?)',
+        [username, slot.date, slot.time]
+      );
+    }
+
+    await connection.commit();
+    res.json({ success: true });
+  } catch (err) {
+    await connection.rollback();
+    res.json({ success: false, message: err.message });
+  } finally {
+    connection.release();
+  }
+});
+
+app.get('/getUsername', (req, res) => {
+  if (req.session.is_logined && req.session.nickname) {
+    res.json({ username: req.session.nickname });
+  } else {
+    res.json({ username: null });
+  }
+});
+
+
+app.get('/getMyReservations', async (req, res) => {
+  if (!req.session.is_logined || !req.session.nickname) {
+    return res.status(401).json({ error: '로그인이 필요합니다.' });
+  }
+
+  try {
+    const [rows] = await db.query(
+      'SELECT DATE_FORMAT(date, "%Y-%m-%d") as date, time FROM reservations WHERE username = ? ORDER BY date, time',
+      [req.session.nickname]
+    );
+    res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'DB 조회 오류' });
+  }
+});
+
+
+app.post('/cancelReservation', async (req, res) => {
+  const { date, time } = req.body;
+  const username = req.session.nickname;
+
+  if (!username) {
+    return res.status(401).json({ success: false, message: '로그인이 필요합니다.' });
+  }
+
+  try {
+    const cancelDeadline = dayjs(`${date}T00:00:00Z`).subtract(1, 'day').hour(31).minute(0).second(0); // 전날 22시로하려면 hour31로 설정해야됨(이유는모름)
+    const now = dayjs().add(9, 'hour');
+
+    if (now.isAfter(cancelDeadline)) {
+      return res.status(400).json({ success: false, message: 'キャンセル可能な時間が過ぎました。 受講日前日の22時までキャンセル可能です。' });
+    }
+
+    const [result] = await db.query(
+      'DELETE FROM reservations WHERE username = ? AND date = ? AND time = ?',
+      [username, date, time]
+    );
+
+    if (result.affectedRows > 0) {
+      res.json({ success: true });
+    } else {
+      res.json({ success: false, message: '該当する予約が存在しないか、既にキャンセルされました。' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'DB 오류가 발생했습니다.' });
+  }
+});
+
+
+app.get('/getMyReservations', async (req, res) => {
+  const username = req.session.nickname;
+  if (!username) return res.status(401).json([]);
+
+  try {
+    const [rows] = await db.query(
+      'SELECT * FROM reservations WHERE username = ? AND CONCAT(date, " ", time) >= NOW() ORDER BY date, time',
+      [username]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json([]);
+  }
+});
+
+app.get('/getMyPastReservations', async (req, res) => {
+  const username = req.session.nickname;
+  if (!username) return res.status(401).json([]);
+
+  try {
+    const [rows] = await db.query(
+      'SELECT * FROM reservations WHERE username = ? AND CONCAT(date, " ", time) < NOW() ORDER BY date DESC, time DESC',
+      [username]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json([]);
+  }
+});
+
+
 
 
 app.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`)
-})
+  console.log(`Example app listening at http://localhost:${port}`)
+});
+

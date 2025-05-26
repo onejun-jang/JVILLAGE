@@ -1,0 +1,39 @@
+
+.title{
+    white-space: nowrap;
+    font-size: clamp(24px, 5vw, 40px);
+    font-weight: 700;
+    text-align: center;
+    margin: clamp(24px, 4vw, 40px) 0 clamp(24px, 4vw, 70px) 0;
+}
+
+.substance{
+    text-align: center;
+    border: 4px solid black;
+    border-radius: 20px;
+    width: 50%;
+    min-width: 310px;
+    /* height: 400px; */
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+ul{
+    padding-left: 0;
+    margin-left: 0;
+}
+li{
+    list-style: none;
+    margin: 5%;
+  }
+
+.substance h3{
+    font-size: clamp(14.6px, 2vw, 30px);
+    margin: -2% 0 ;
+    text-align: justify;
+}
+
+.substance p{
+    font-size: clamp(11px, 1.1vw, 30px);
+    text-align: justify;
+}

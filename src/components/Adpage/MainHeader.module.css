@@ -1,0 +1,50 @@
+.layout{
+    position: fixed;
+    width: 100%;
+    top:0;
+    z-index: 2000;
+}
+
+.substance{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 auto;
+    padding: 2% 2%;
+    width: 80%;
+    background-color: white;
+}
+
+.navselector{
+    display: flex;
+    justify-content: space-evenly;
+    text-align: center;
+    padding: 10px 0px;
+    width: 35%;
+    min-width: 300px;
+    border: 3px solid red;
+    border-radius: 20px;
+    margin: 0 auto;
+}
+
+.navbtn{
+    border: none;
+    background-color: transparent;
+    height: auto;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.slash{
+    font-size: 20px;
+}
+
+.navlogin{
+    border: none;
+    background-color: transparent;
+    color: gray;
+    font-weight: 500;
+    height: auto;
+    font-size: 15px;
+}
+

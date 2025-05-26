@@ -1,0 +1,58 @@
+
+.substance{
+    display: flex;
+    justify-content: space-around;
+    width: 80%;
+    margin: 0 auto;
+}
+
+.ingang{
+    width: 50%;
+    aspect-ratio: 4 / 3;
+    object-fit: contain;
+
+}
+
+.textcontent{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    gap: 10px;
+    font-size: clamp(15px, 4.5vw, 70px); 
+    
+    height: 90%;
+    width: 40%;
+    margin: auto auto;    
+}
+
+.lefttext{
+    bottom: 100%;
+    display: flex;
+    justify-content: flex-start;
+    height: auto;
+    /* width: auto; */
+    font-weight: 500;
+    transform: translateY(2%);
+    
+}
+
+.righttext{
+    display: flex;
+    justify-content: flex-end;
+    height: auto;
+    font-weight: 500;
+    transform: translateY(2%);
+}
+
+.redhighlight{
+    position: relative;
+    font-style: italic;
+    font-size: clamp(15px, 4.8vw, 84px);
+    font-weight: 700;
+    color: red;
+    margin-right: 5px;
+    transform: translateY(-10%);
+}
+
+

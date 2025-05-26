@@ -1,0 +1,79 @@
+
+.title{
+    font-size: clamp(24px, 5vw, 40px);
+    font-weight: 700;
+    text-align: center;
+    margin: 40px 0;
+}
+
+.item{
+    display: flex;
+    width: 80%;
+    margin: 0 auto;
+}
+
+.itemText{
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    text-align: left;
+    gap: 10px;
+    font-size: clamp(15px, 4vw, 45px); 
+    
+    height: 90%;
+    width: 50%;
+    margin: auto auto;    
+}
+
+.itemImage{
+    flex: 0.8;
+    margin: auto 0 ;
+}
+
+.question{
+    width: 55%;
+    margin-left: 15%;
+    height: auto;
+}
+
+.itemTitle{
+    font-weight: 700;
+    margin-bottom: 70px;
+}
+
+.itemDescription{
+    font-size: 0.6em;
+}
+
+.itemImage2{
+    flex: 0.9;
+    object-fit: contain;
+    margin: auto 0 ;
+}
+
+.frustration{
+    width: 51%;
+    margin-left: 15%;
+}
+
+.itemImage3{
+    flex: 1;
+    object-fit: contain;
+    margin: auto 0 ;
+}
+
+.itemImage4{
+    flex: 1;
+    object-fit: contain;
+    margin: auto 0 ;
+}
+
+.afraid{
+    width: 58%;
+    margin-left: 15%;
+}
+
+.culture{
+    width: 58%;
+    margin-left: 15%;
+}

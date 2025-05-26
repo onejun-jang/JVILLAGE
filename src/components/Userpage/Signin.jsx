@@ -1,7 +1,8 @@
 import styles from './Signin.module.css';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-function Signin(props) {
+function Signin() {
     const [id, setId] = useState("");
     const [password, setPassword] = useState("");
     const [password2, setPassword2] = useState("");
@@ -13,6 +14,7 @@ function Signin(props) {
     const [isIdAvailable, setIsIdAvailable] = useState(null);  
     const [PWCheckMessage, setPWCheckMessage] = useState("");
     const [isPWAvailable, setPWAvailable] = useState(null);  
+    const navigate = useNavigate();
     const IDcheck = () => {
       const userData = {
         userId: id
@@ -63,12 +65,12 @@ function Signin(props) {
 
 
     return <>
-      <div className={styles.container}>
-        <div className={styles.background}>
-          <h2>会員登録</h2>
+      <div className={styles.layout}>
+        <div className={styles.content}>
+          <h1>会員登録</h1>
       
           <div className={styles.form}>
-            <p><input className={styles.loginID} type="text" placeholder="ID" onChange={event => {
+            <p><input className={styles.loginID} type="text" placeholder="メールアドレス" onChange={event => {
               setId(event.target.value);
             }} />
             <button className={styles.IDchk} type="button" onClick={IDcheck} disabled={!id}>IDチェック</button></p>
@@ -128,7 +130,7 @@ function Signin(props) {
                 .then((json) => {
                   if(json.isSuccess==="True"){
                     alert('会員登録に成功しました。')
-                    props.setMode("LOGIN");
+                    navigate('/login');
                   }
                   else{
                     alert(json.isSuccess)
@@ -138,7 +140,7 @@ function Signin(props) {
           </div>
       
           <p><button onClick={() => {
-            props.setMode("LOGIN");
+            navigate('/login');
           }}>ログイン</button>に戻る</p>
         </div>
       </div>
