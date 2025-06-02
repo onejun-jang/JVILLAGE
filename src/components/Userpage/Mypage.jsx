@@ -2,6 +2,8 @@ import styles from './Mypage.module.css';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Reservation from './Reservation';
+import TicketManager from './TicketManager';
+import ProfileEdit from './ProfileEdit';
 
 function Mypage({ setIsLogin }) {
   const [userName, setUserName] = useState('遥');
@@ -48,8 +50,8 @@ function Mypage({ setIsLogin }) {
 
         <div className={styles.content}>
           {activeTab === 'reservation' && <Reservation />}
-          {activeTab === 'ticket' && <div>수강권관리 내용</div>}
-          {activeTab === 'profile' && <div>개인정보수정 내용</div>}
+          {activeTab === 'ticket' && <TicketManager />}
+          {activeTab === 'profile' && <ProfileEdit setIsLogin={setIsLogin} />}
         </div>
       </div>
     </div>

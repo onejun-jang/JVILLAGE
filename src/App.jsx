@@ -1,10 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import styles from './App.module.css';
 import { useState, useEffect } from 'react';
 import AdPage from './components/Adpage/IndexAdPage';
 import Login from './components/Userpage/Login';
 import Signin from './components/Userpage/Signin';
-// import Welcome from './components/Userpage/Welcome';
 import { Navigate } from 'react-router-dom';
 import Mypage from './components/Userpage/Mypage'; // 실제 파일 경로에 맞게 수정
 

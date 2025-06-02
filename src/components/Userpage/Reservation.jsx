@@ -8,6 +8,36 @@ function Reservation() {
   const [pastReservations, setPastReservations] = useState([]);
   const [availabilityTable, setAvailabilityTable] = useState([]);
   const [selectedSlots, setSelectedSlots] = useState([]); // 배열로 변경
+  const [lessonTickets, setLessonTickets] = useState(0);
+  const [cancelTickets, setCancelTickets] = useState(0);
+
+  const fetchLessonTickets = async () => {
+    try {
+      const res = await fetch('/userTickets', { credentials: 'include' });
+      const data = await res.json();
+      setLessonTickets(data.lessonTickets);
+    } catch (error) {
+      console.error('キャンセル券の取得エラー:', error);
+    }
+  };
+  
+  
+  const fetchCancelTickets = async () => {
+    try {
+      const res = await fetch('/userTickets', { credentials: 'include' });
+      const data = await res.json();
+      setCancelTickets(data.cancelTickets);
+    } catch (error) {
+      console.error('キャンセル券の取得エラー:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchLessonTickets();
+    fetchCancelTickets();
+  }, []);
+
+  
 
   // 다음날부터 +14일까지로 일단 설정
   const getNext14Days = () => {
@@ -89,8 +119,9 @@ function Reservation() {
         setAvailabilityTable(availData);
 
         setSelectedSlots([]);
+        fetchLessonTickets();
       } else {
-        alert('選択した時間の一部が既予約されています。');
+        alert(data.message);
       }
     } catch (error) {
       console.error(error);
@@ -120,6 +151,10 @@ function Reservation() {
         const availRes = await fetch('/getAvailabilityTable', { credentials: 'include' });
         const availData = await availRes.json();
         setAvailabilityTable(availData);
+
+        await fetchCancelTickets();
+        await fetchLessonTickets();
+
       } else {
         alert(data.message);
       }
@@ -135,7 +170,7 @@ function Reservation() {
     <div className={styles.reservationContainer}>
       <div className={styles.statusWrapper}>
         <div className={styles.reservedSection}>
-          <h2>予約状況</h2>
+          <h2>予約状況<span style={{fontSize:'16px', color:'gray'}} >(残余受講件:{lessonTickets}、 残余キャンセル券:{cancelTickets})</span></h2>
           <ul>
             {reserved.filter(item => {
               const now = new Date();
@@ -152,9 +187,12 @@ function Reservation() {
                 })
                 .map((item, idx) => {
                   const now = new Date();
+                  const now22 = new Date();
+                  now22.setHours(23, 0, 0, 0);
                   const cancelDeadline = new Date(`${item.date}T22:00:00`);
                   cancelDeadline.setDate(cancelDeadline.getDate() - 1);
                   const isPastCancelDeadline = now > cancelDeadline;
+                  // const isPastCancelDeadline = now22 > cancelDeadline;
 
                   return (
                     <li key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

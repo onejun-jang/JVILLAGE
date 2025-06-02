@@ -3,6 +3,8 @@ const cors = require('cors')
 const session = require('express-session')
 const path = require('path');
 const dayjs = require('dayjs');
+
+
 const app = express()
 const port = 3001
 
@@ -52,7 +54,7 @@ app.get('/logout', function (req, res) {
   });
 });
 
-app.post("/login", async (req, res) => { // async 붙임(프로미스처리타입)
+app.post("/login", async (req, res) => { 
   const username = req.body.userId;
   const password = req.body.userPassword;
   const sendData = { isLogin: "" };
@@ -66,10 +68,14 @@ app.post("/login", async (req, res) => { // async 붙임(프로미스처리타�
     const [results] = await db.query('SELECT * FROM userTable WHERE username = ?', [username]);
     if (results.length > 0) {
       const user = results[0];
+      // console.log(user);
       const match = await bcrypt.compare(password, user.password);
       if (match) {
         req.session.is_logined = true;
-        req.session.nickname = username;
+        req.session.nickname = user.username;
+        // console.log(req.session.nickname);
+        req.session.nickname2 = user.firstnameKana;
+        // console.log(req.session.nickname2);
         req.session.save(() => {
           sendData.isLogin = "True";
           res.send(sendData);
@@ -122,6 +128,7 @@ app.post("/signin", async (req, res) => {
   const firstnameKana = req.body.firstnameKana;
   const idavailable = req.body.idavailable;
   const pwavailable = req.body.pwavailable;
+  const phoneNumber = req.body.phoneNumber;
   
   const sendData = { isSuccess: "" };
 
@@ -133,6 +140,10 @@ app.post("/signin", async (req, res) => {
     sendData.isSuccess = "パスワードを入力してください。"
     return res.send(sendData);
   } 
+  if (!phoneNumber) {
+    sendData.isSuccess = "電話番号を入力してください。"
+    return res.send(sendData);
+  }   
   if (!lastnameKanji || !firstnameKanji || !lastnameKana || !firstnameKana) {
     sendData.isSuccess = "氏名を確認してください。"
     return res.send(sendData);
@@ -144,8 +155,12 @@ app.post("/signin", async (req, res) => {
     if (idavailable && pwavailable) {
       const hashedPassword = await bcrypt.hash(password, 10);
       await db.query(
-        'INSERT INTO userTable (username, password, lastnameKanji, firstnameKanji, lastnameKana, firstnameKana) VALUES (?, ?, ?, ?, ?, ?)', 
-        [username, hashedPassword, lastnameKanji, firstnameKanji, lastnameKana, firstnameKana]
+        'INSERT INTO userTable (username, password, phoneNumber, lastnameKanji, firstnameKanji, lastnameKana, firstnameKana) VALUES (?, ?, ?, ?, ?, ?, ?)', 
+        [username, hashedPassword, phoneNumber, lastnameKanji, firstnameKanji, lastnameKana, firstnameKana]
+      );
+      await db.query(
+        'INSERT INTO userTickets (username, lesson_tickets, cancel_tickets) VALUES (?, ?, ?)',
+        [username, 1, 0]
       );
       await new Promise((resolve) => req.session.save(resolve)); // 세션 저장 대기
       sendData.isSuccess = "True";
@@ -238,6 +253,19 @@ app.post('/reserve', async (req, res) => {
   try {
     await connection.beginTransaction();
 
+    const [[user]] = await connection.query(
+      'SELECT lesson_tickets FROM userTickets WHERE username = ?',
+      [username]
+    );
+
+    if (!user) {
+      throw new Error('ユーザー情報が見つかりません。');
+    }
+
+    if (user.lesson_tickets < slots.length) {
+      throw new Error('受講券が不足しています。');
+    }    
+
     for (const slot of slots) {
       const [rows] = await connection.query(
         'SELECT * FROM reservations WHERE date = ? AND time = ?',
@@ -253,6 +281,12 @@ app.post('/reserve', async (req, res) => {
       );
     }
 
+      await connection.query(
+      'UPDATE userTickets SET lesson_tickets = lesson_tickets - ? WHERE username = ?',
+      [slots.length, username]
+    );
+
+
     await connection.commit();
     res.json({ success: true });
   } catch (err) {
@@ -265,7 +299,7 @@ app.post('/reserve', async (req, res) => {
 
 app.get('/getUsername', (req, res) => {
   if (req.session.is_logined && req.session.nickname) {
-    res.json({ username: req.session.nickname });
+    res.json({ username: req.session.nickname2 });
   } else {
     res.json({ username: null });
   }
@@ -306,12 +340,27 @@ app.post('/cancelReservation', async (req, res) => {
       return res.status(400).json({ success: false, message: 'キャンセル可能な時間が過ぎました。 受講日前日の22時までキャンセル可能です。' });
     }
 
+    const [[ticketRow]] = await db.query(
+      'SELECT cancel_tickets FROM userTickets WHERE username = ?',
+      [username]
+    );
+
+    if (!ticketRow || ticketRow.cancel_tickets < 1) {
+      return res.status(400).json({ success: false, message: 'キャンセル券が不足しています。' });
+    }    
+
     const [result] = await db.query(
       'DELETE FROM reservations WHERE username = ? AND date = ? AND time = ?',
       [username, date, time]
     );
 
+
+
     if (result.affectedRows > 0) {
+        await db.query(
+        'UPDATE userTickets SET cancel_tickets = cancel_tickets - 1, lesson_tickets = lesson_tickets +1 WHERE username = ?',
+        [username]
+      );
       res.json({ success: true });
     } else {
       res.json({ success: false, message: '該当する予約が存在しないか、既にキャンセルされました。' });
@@ -345,7 +394,7 @@ app.get('/getMyPastReservations', async (req, res) => {
 
   try {
     const [rows] = await db.query(
-      'SELECT * FROM reservations WHERE username = ? AND CONCAT(date, " ", time) < NOW() ORDER BY date DESC, time DESC',
+      `SELECT * FROM reservations WHERE username = ? AND DATE_ADD(STR_TO_DATE(CONCAT(date, ' ', time), '%Y-%m-%d %H:%i:%s'), INTERVAL 25 MINUTE) < NOW() ORDER BY date DESC, time DESC`,
       [username]
     );
     res.json(rows);
@@ -354,6 +403,215 @@ app.get('/getMyPastReservations', async (req, res) => {
     res.status(500).json([]);
   }
 });
+
+app.get('/userTickets', async (req, res) => {
+  const username = req.session.nickname;
+
+  if (!username) {
+    return res.status(401).json({ success: false, message: '로그인이 필요합니다.' });
+  }
+
+  try {
+    const [[userTickets]] = await db.query(
+      'SELECT lesson_tickets, cancel_tickets FROM userTickets WHERE username = ?',
+      [username]
+    );
+
+    if (!userTickets) {
+      return res.status(404).json({ success: false, message: '사용자 티켓 정보가 없습니다.' });
+    }
+
+    res.json({ 
+      success: true, 
+      lessonTickets: userTickets.lesson_tickets, 
+      cancelTickets: userTickets.cancel_tickets 
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: '서버 오류가 발생했습니다.' });
+  }
+});
+
+app.post('/addTestTickets', async (req, res) => {
+  const username = req.session.nickname;
+
+  if (!username) {
+    return res.status(401).json({ success: false, message: '로그인이 필요합니다。' });
+  }
+
+  try {
+    await db.query(
+      'UPDATE userTickets SET lesson_tickets = lesson_tickets + 1, cancel_tickets = cancel_tickets + 1 WHERE username = ?',
+      [username]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'DB 오류가 발생했습니다。' });
+  }
+});
+
+app.get('/sessioninfo', (req, res) => {
+  console.log(req.session); // 서버 콘솔에 출력
+  res.json(req.session);    // 클라이언트에 응답
+});
+
+
+app.post('/verify-password', async (req, res) => {
+  const user = req.session.nickname;
+  const { password } = req.body;
+
+  const [rows] = await db.query('SELECT password FROM userTable WHERE username = ?', [user]);
+
+  if (rows.length === 0) return res.sendStatus(401);
+
+  const match = await bcrypt.compare(password, rows[0].password);
+  if (match) {
+    res.sendStatus(200);
+  } else {
+    res.sendStatus(401);
+  }
+});
+
+app.get('/get-profile', async (req, res) => {
+  const user = req.session.nickname;
+
+  const [rows] = await db.query(
+    'SELECT lastnameKanji, firstnameKanji, lastnameKana, firstnameKana, phoneNumber FROM userTable WHERE username = ?',
+    [user]
+  );
+
+  if (rows.length === 0) return res.sendStatus(404);
+
+  res.json(rows[0]);
+});
+
+app.post("/update-password", async (req, res) => {  
+  const password = req.body.userPassword;
+  const password2 = req.body.userPassword2;
+  const pwavailable = req.body.pwavailable;
+  const sendData = { isSuccess: "" };
+
+  if (!password) {
+    sendData.isSuccess = "パスワードを入力してください。"
+    return res.send(sendData);
+  } 
+
+  try {
+    const [results] = await db.query('SELECT * FROM userTable WHERE username = ?', [req.session.nickname]);
+
+    if (pwavailable) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await db.query(
+        'UPDATE userTable SET password = ? WHERE username = ?', 
+        [hashedPassword, req.session.nickname]
+      );
+      await new Promise((resolve) => req.session.save(resolve)); // 세션 저장 대기
+      sendData.isSuccess = "True";
+      res.send(sendData);
+
+    } else {
+      sendData.isSuccess = "パスワードを確認してください。"
+      res.send(sendData);
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: '서버 오류' });
+  }
+});
+
+app.post('/update-profile-info', async (req, res) => {
+  const user = req.session.nickname;
+  const { lastnameKanji, firstnameKanji, lastnameKana, firstnameKana, phoneNumber } = req.body;
+
+  if (!phoneNumber) {
+    return res.status(400).json({ message: 'あっちいけ' })
+  }  
+  if (!lastnameKanji || !firstnameKanji || !lastnameKana || !firstnameKana) {
+    return res.status(400).json({ message: '이름을 입력해주세요' })
+  }  
+
+  await db.query(
+    'UPDATE userTable SET phoneNumber = ?, lastnameKanji = ?, firstnameKanji = ?, lastnameKana = ?, firstnameKana = ? WHERE username = ?',
+    [phoneNumber, lastnameKanji, firstnameKanji, lastnameKana, firstnameKana, user]
+  );
+
+  res.sendStatus(200);
+});
+
+
+
+const PAYPAY = require('@paypayopa/paypayopa-sdk-node');
+
+const API_KEY = 'a_yVvl6BiDOn_C6AC';
+const API_SECRET = 'BkcwQiveG52X4icJUVTl4QtAxxHX4CHNpD3kgm4Uz8k=';
+const MERCHANT_ID = '921806514829295616';
+
+PAYPAY.Configure({
+  clientId: API_KEY,
+  clientSecret: API_SECRET,
+  merchantId: MERCHANT_ID,
+  productionMode: false
+});
+
+app.post('/create-payment', (req, res) => {
+  const merchantPaymentId = `${req.session.nickname}_${Date.now()}`;
+
+  let payload = {
+    merchantPaymentId,
+    amount: { amount:1500, currency: "JPY" },
+    codeType: "ORDER_QR",
+    orderDescription: "回数券",
+    isAuthorization: false
+  };
+
+  PAYPAY.QRCodeCreate(payload, (response) => {
+    if (response.BODY.resultInfo.code === "SUCCESS") {
+      res.json({
+        success: true,
+        qrUrl: response.BODY.data.url,
+        merchantPaymentId
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: response.BODY.resultInfo.message
+      });
+    }
+  });
+});
+
+
+//임시
+
+app.use(express.json());
+app.post('/paypay-webhook', async (req, res) => {
+  console.log(req.body);
+  const { state, merchant_order_id} = req.body;
+  console.log('state:',state);
+  console.log(merchant_order_id);
+
+  
+  if (state !== 'COMPLETED') {
+    return res.status(400).json({ message: '결제 미완료 상태입니다.' });
+  }
+
+ 
+  try {
+    db.query('UPDATE usertickets SET lesson_tickets = lesson_tickets + 1, cancel_tickets = cancel_tickets + 1 WHERE username = ?',[merchant_order_id.split('_')[0]]);
+
+    return res.status(200).json({ message: '수강권 업데이트 완료' });
+  } catch (err) {
+    console.error('DB 처리 오류:', err);
+    return res.status(500).json({ message: '서버 내부 오류' });
+  }
+});
+
+
+
+
+
+
 
 
 

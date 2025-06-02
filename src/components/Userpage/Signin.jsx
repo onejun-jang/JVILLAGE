@@ -14,6 +14,7 @@ function Signin() {
     const [isIdAvailable, setIsIdAvailable] = useState(null);  
     const [PWCheckMessage, setPWCheckMessage] = useState("");
     const [isPWAvailable, setPWAvailable] = useState(null);  
+    const [phonenumber, setPhonenumber] = useState("");
     const navigate = useNavigate();
     const IDcheck = () => {
       const userData = {
@@ -85,7 +86,10 @@ function Signin() {
             }} /></p>
             <p className={isPWAvailable ? styles.success : styles.warning}>
               {PWCheckMessage}
-            </p>            
+            </p>    
+            <p><input className={styles.phone} type="text" placeholder="電話番号" onChange={event => {
+              setPhonenumber(event.target.value);
+            }} /></p>                    
 
 
             <div className={styles.nameWrapper}>
@@ -117,7 +121,8 @@ function Signin() {
                 lastnameKana: lastnamekana,
                 firstnameKana: firstnamekana,
                 idavailable: isIdAvailable,
-                pwavailable: isPWAvailable
+                pwavailable: isPWAvailable,
+                phoneNumber: phonenumber
               };
               fetch("/signin", { //signin 주소에서 받을 예정
                 method: "post", // method :통신방법
