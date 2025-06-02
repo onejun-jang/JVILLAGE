@@ -1,4 +1,3 @@
-// 기존 import 유지
 import styles from './Reservation.module.css';
 import { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
@@ -7,7 +6,7 @@ function Reservation() {
   const [reserved, setReserved] = useState([]);
   const [pastReservations, setPastReservations] = useState([]);
   const [availabilityTable, setAvailabilityTable] = useState([]);
-  const [selectedSlots, setSelectedSlots] = useState([]); // 배열로 변경
+  const [selectedSlots, setSelectedSlots] = useState([]); // 배열 변경용
   const [lessonTickets, setLessonTickets] = useState(0);
   const [cancelTickets, setCancelTickets] = useState(0);
 
@@ -17,7 +16,7 @@ function Reservation() {
       const data = await res.json();
       setLessonTickets(data.lessonTickets);
     } catch (error) {
-      console.error('キャンセル券の取得エラー:', error);
+      console.error('受講券の取得エラー:', error);
     }
   };
   
@@ -46,7 +45,7 @@ function Reservation() {
     for (let i = 1; i < 15; i++) {
       const d = new Date(today);
       d.setDate(today.getDate() + i);
-      dates.push(d.toISOString().split('T')[0]); // YYYY-MM-DD, 나중에 dayjs로 변경하기
+      dates.push(d.toISOString().split('T')[0]); // YYYY-MM-DD, 나중에 dayjs로 변경하는게 나을듯듯
     }
     return dates;
   };
@@ -75,7 +74,7 @@ function Reservation() {
         const availData = await availRes.json();
         setAvailabilityTable(availData);
       } catch (error) {
-        console.error('데이터 불러오기 오류:', error);
+        console.error('データ読み込みエラー:', error);
       }
     };
 
@@ -125,7 +124,7 @@ function Reservation() {
       }
     } catch (error) {
       console.error(error);
-      alert('예약 중 오류가 발생했습니다.');
+      alert('予約手続きエラー');
     }
   };
 
@@ -160,7 +159,7 @@ function Reservation() {
       }
     } catch (error) {
       console.error(error);
-      alert('서버 오류로 예약 취소에 실패했습니다.');
+      alert('サバ―エラーにより予約キャンセルに失敗しました。');
     }
   };
 
@@ -170,7 +169,7 @@ function Reservation() {
     <div className={styles.reservationContainer}>
       <div className={styles.statusWrapper}>
         <div className={styles.reservedSection}>
-          <h2>予約状況<span style={{fontSize:'16px', color:'gray'}} >(残余受講件:{lessonTickets}、 残余キャンセル券:{cancelTickets})</span></h2>
+          <h2 style={{marginLeft: '10px'}}>予約状況<span className={styles.reservationTickets}>(残余受講件:{lessonTickets}、 残余キャンセル券:{cancelTickets})</span></h2>
           <ul>
             {reserved.filter(item => {
               const now = new Date();
@@ -217,26 +216,26 @@ function Reservation() {
           </ul>
         </div>
 
-      <div className={styles.pastSection}>
-        <h2>受講履歴</h2>
-        <ul>
-          {pastReservations.length === 0 ? (
-            <li>受講履歴がありません。</li>
-          ) : (
-            pastReservations.map((item, idx) => {
-              const localDate = dayjs(item.date).add(9, 'hour').format('YYYY-MM-DD');
-              return (
-                <li key={idx}>
-                  {localDate} - {item.time}
-                </li>
-              );
-            })
-          )}
-        </ul>
-      </div>
+        <div className={styles.pastSection}>
+          <h2 style={{marginLeft: '10px'}}>受講履歴</h2>
+          <ul>
+            {pastReservations.length === 0 ? (
+              <li>受講履歴がありません。</li>
+            ) : (
+              pastReservations.map((item, idx) => {
+                const localDate = dayjs(item.date).add(9, 'hour').format('YYYY-MM-DD');
+                return (
+                  <li key={idx}>
+                    {localDate} - {item.time}
+                  </li>
+                );
+              })
+            )}
+          </ul>
+        </div>
       </div>
 
-      <h2>スケジュール表</h2>
+      <h2>スケジュール一覧</h2>
       <div className={styles.tableWrapper}>
         <table className={styles.reservationTable}>
           <thead>

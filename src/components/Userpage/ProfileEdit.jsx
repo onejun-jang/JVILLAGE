@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styles from './ProfileEdit.module.css';
 
 function ProfileEdit({ setIsLogin }) {
-  const [step, setStep] = useState('verify'); // verify, edit
+  const [step, setStep] = useState('verify'); // verify, edit같은게 있다고 함함
   const [password, setPassword] = useState('');
   const [password2, setPassword2] = useState('');  
   const [PWCheckMessage, setPWCheckMessage] = useState("");
@@ -19,15 +19,16 @@ function ProfileEdit({ setIsLogin }) {
   const [infoMessage, setInfoMessage] = useState('');
   const navigate = useNavigate();
 
+  //패스워드 확인용
     useEffect(() => {
     if (!password2) {
         setPWCheckMessage("");
         setIsPWAvailable(null);
     } else if (password === password2) {
-        setPWCheckMessage("パスワードが一致します。");
+        setPWCheckMessage("パスワードが一致しています。");
         setIsPWAvailable(true);
     } else {
-        setPWCheckMessage("パスワードが一致しません。");
+        setPWCheckMessage("パスワードが一致していません。");
         setIsPWAvailable(false);
     }
     }, [password, password2]);
@@ -48,7 +49,7 @@ function ProfileEdit({ setIsLogin }) {
       const data = await res2.json();
       setUserData(data);
     } else {
-      setVerifyError('비밀번호가 일치하지 않습니다.');
+      setVerifyError('パスワードを確認してください。');
     }
   };
 
@@ -68,7 +69,7 @@ function ProfileEdit({ setIsLogin }) {
     });
 
   if (res.ok) {
-    setInfoMessage('개인정보가 성공적으로 변경되었습니다.');
+    setInfoMessage('個人情報変更が完了しました。');
   } else {
     const data = await res.json();  // 에러 메시지 읽기
     setInfoMessage(data.message);
@@ -79,25 +80,25 @@ function ProfileEdit({ setIsLogin }) {
     <div className={styles.profileEdit}>
       {step === 'verify' && (
         <>
-          <h3>비밀번호 확인</h3>
+          <h3>パスワード確認</h3>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="현재 비밀번호 입력"
+            placeholder="パスワード"
           />
-          <button onClick={handleVerify}>확인</button>
+          <button onClick={handleVerify}>確認</button>
           {verifyError && <p className={styles.error}>{verifyError}</p>}
         </>
       )}
 
       {step === 'edit' && (
         <>
-          <h3>비밀번호 변경</h3>
+          <h3>パスワード変更</h3>
           <input
             type="password"
             name="password"
-            placeholder="새 비밀번호"
+            placeholder="新規パスワード"
             onChange={event => {
               setPassword(event.target.value);
             }}
@@ -105,7 +106,7 @@ function ProfileEdit({ setIsLogin }) {
           <input
             type="password"
             name="password2"
-            placeholder="새 비밀번호 확인"
+            placeholder="パスワード確認"
             onChange={event => {
               setPassword2(event.target.value);
             }}
@@ -143,45 +144,45 @@ function ProfileEdit({ setIsLogin }) {
          
           <hr />
 
-          <h3>개인정보 수정</h3>
+          <h3>個人情報変更</h3>
           <input
             type="text"
             name="phoneNumber"
             value={userData.phoneNumber}
-            placeholder="핸드폰 번호"
+            placeholder="電話番号"
             onChange={handleUserChange}
           />          
           <input
             type="text"
             name="lastnameKanji"
             value={userData.lastnameKanji}
-            placeholder="성"
+            placeholder="氏(漢字)"
             onChange={handleUserChange}
           />
           <input
             type="text"
             name="firstnameKanji"
             value={userData.firstnameKanji}
-            placeholder="이름"
+            placeholder="名(漢字)"
             onChange={handleUserChange}
           />
           <input
             type="text"
             name="lastnameKana"
             value={userData.lastnameKana}
-            placeholder="성(가타카나)"
+            placeholder="氏(カナ)"
             onChange={handleUserChange}
           />
           <input
             type="text"
             name="firstnameKana"
             value={userData.firstnameKana}
-            placeholder="이름(가타카나)"
+            placeholder="名(カナ)"
             onChange={handleUserChange}
           />
 
-          <button onClick={handleInfoSubmit}>개인정보 수정</button>
-          {infoMessage && <p>{infoMessage}</p>}
+          <button onClick={handleInfoSubmit}>変更</button>
+          {infoMessage && <p style={{marginLeft : '7px'}} >{infoMessage}</p>}
         </>
       )}
     </div>

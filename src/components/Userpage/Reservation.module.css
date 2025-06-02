@@ -8,6 +8,12 @@ h2 {
   margin-bottom: 10px;
 }
 
+.reservationTickets{
+  font-size: 16px;
+  color: gray;
+  margin-left: 10px;
+}
+
 ul {
   list-style-type: disc;
   margin-left: 20px;
@@ -37,27 +43,22 @@ ul {
   transition: background-color 0.3s ease;
 }
 
-/* 예약 가능 */
 .available {
   background-color: #ffe6f0;
 }
 
-
-/* 예약 불가능 */
 .unavailable {
   background-color: #f0f0f0;
   color: #999;
   cursor: not-allowed;
 }
 
-/* 선택됨 */
 .selected {
   background-color: red !important;
   color: white;
   font-weight: bold;
 }
 
-/* 예약 확인창 */
 .reserveConfirm {
   margin-top: 20px;
   padding: 10px;

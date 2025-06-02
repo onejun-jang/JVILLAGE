@@ -6,10 +6,10 @@ import { useNavigate } from 'react-router-dom';
 function Login(props) {
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberId, setRememberId] = useState(false); // 아이디 저장 여부
+  const [rememberId, setRememberId] = useState(false); 
   const navigate = useNavigate();
 
-  // 컴포넌트 마운트 시 저장된 ID 불러오기
+  //아이디 저장 기능용용
   useEffect(() => {
     const savedId = localStorage.getItem('rememberedId');
     if (savedId) {
@@ -51,43 +51,40 @@ function Login(props) {
     });
   };
   
-
-
-    
-    return <>
-      <div className={styles.layout}>
-        <div className={styles.content}>
-          <img src={loginimage} alt="LOGINimage" className={styles.loginImage}/>
-          <div className={styles.loginForm}>
-            <h1>ログイン</h1>
-        
-            <div className={styles.form}>
-              <p><input className={styles.login} type="text" name="username" placeholder="Example @ jvillage.com" value={id} onChange={event => {
-                setId(event.target.value);
-              }} /></p>
-              <p><input className={styles.login} type="password" name="pwd" placeholder="パスワード" onChange={event => {
-                setPassword(event.target.value);
-              }} /></p>
-              <p style={{ textAlign: 'left', padding: '0 0 0 11%' }}>
-                <input
-                  type="checkbox"
-                  id="rememberId"
-                  checked={rememberId}
-                  onChange={(e) => setRememberId(e.target.checked)}
-                />
-                <label htmlFor="rememberId">IDを保存する</label>
-              </p>              
-        
-              <p><input className={styles.btn} type="submit" value="ログイン" onClick={handleLogin} /></p>
-            </div>
-        
-            <p>アカウントがまだですか？  <button onClick={() => {
-              navigate('/signin');
-            }}>会員登録</button></p>
+  return <>
+    <div className={styles.layout}>
+      <div className={styles.content}>
+        <img src={loginimage} alt="LOGINIMAGE" className={styles.loginImage}/>
+        <div className={styles.loginForm}>
+          <h1>ログイン</h1>
+      
+          <div className={styles.form}>
+            <p><input className={styles.login} type="text" name="username" placeholder="Example @ jvillage.com" value={id} onChange={event => {
+              setId(event.target.value);
+            }} /></p>
+            <p><input className={styles.login} type="password" name="pwd" placeholder="パスワード" onChange={event => {
+              setPassword(event.target.value);
+            }} /></p>
+            <p style={{ textAlign: 'left', padding: '0 0 0 11%' }}>
+              <input
+                type="checkbox"
+                id="rememberId"
+                checked={rememberId}
+                onChange={(e) => setRememberId(e.target.checked)}
+              />
+              <label htmlFor="rememberId">IDを保存する</label>
+            </p>              
+      
+            <p><input className={styles.btn} type="submit" value="ログイン" onClick={handleLogin} /></p>
           </div>
+      
+          <p>アカウントがまだですか？  <button onClick={() => {
+            navigate('/signin');
+          }}>会員登録</button></p>
         </div>
-       </div>
-    </> 
+      </div>
+    </div>
+  </> 
   }
 
   export default Login;

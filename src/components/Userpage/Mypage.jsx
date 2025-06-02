@@ -6,10 +6,12 @@ import TicketManager from './TicketManager';
 import ProfileEdit from './ProfileEdit';
 
 function Mypage({ setIsLogin }) {
-  const [userName, setUserName] = useState('遥');
+  const [userName, setUserName] = useState('NAME');
   const [activeTab, setActiveTab] = useState('reservation'); 
   const navigate = useNavigate();
 
+
+//인삿말
   useEffect(() => {
     fetch('/getUsername',{
         credentials: 'include'

@@ -15,7 +15,7 @@
 }
 
 .profileEdit input {
-  width: 100%;
+  width: 95%;
   padding: 10px;
   margin-bottom: 12px;
   border: 1px solid #ccc;
@@ -42,20 +42,19 @@
 .error {
   color: darkred;
   font-size: 13px;
-  margin-top: -8px;
-  margin-bottom: 12px;
+  margin: -2px 0 12px 7px; 
 }
 
 .success {
   color: red;
   font-size: 15px;
-  text-align: center;
-  margin-top: 20px;
+  /* text-align: center; */
+  margin: 0 0 15px 5px;
 }
 
 .warning{
   color: 	#4B0000;
   font-size: 15px;
-  text-align: center;
-  margin-top: 20px;
+  /* text-align: center; */
+  margin: 0 0 15px 5px;
 }

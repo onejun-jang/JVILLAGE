@@ -60,13 +60,11 @@ th.rowTitle {
 th.nvillage,
 td.nvillage{
   height: 4vh;
-  /* width:100px; */
   width:clamp(40px,0.8vh,100px)
 }
 
 .note{
   margin-top: 15px;
   font-size: 12px;
-  /* text-align: left; */
 }
 

@@ -26,7 +26,7 @@ function Signin() {
         headers: {     
           "content-type": "application/json",
         },
-        body: JSON.stringify(userData), //userData라는 객체를 보냄
+        body: JSON.stringify(userData), 
       })
         .then((res) => res.json())
         .then((json) => {
@@ -124,12 +124,12 @@ function Signin() {
                 pwavailable: isPWAvailable,
                 phoneNumber: phonenumber
               };
-              fetch("/signin", { //signin 주소에서 받을 예정
-                method: "post", // method :통신방법
-                headers: {      // headers: API 응답에 대한 정보를 담음
+              fetch("/signin", { 
+                method: "post", 
+                headers: {     
                   "content-type": "application/json",
                 },
-                body: JSON.stringify(userData), //userData라는 객체를 보냄
+                body: JSON.stringify(userData), 
               })
                 .then((res) => res.json())
                 .then((json) => {

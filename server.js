@@ -27,9 +27,9 @@ app.use(session({
   saveUninitialized: false,
     cookie: {
     httpOnly: true,
-    secure: false,  // HTTPS가 아니라면 false
-    sameSite: 'lax', // 또는 'strict'
-    maxAge: 1000 * 60 * 60 * 24 
+    secure: false,  
+    sameSite: 'lax', 
+    maxAge: 1000 * 60 * 60 * 24　// 세션유지
   }
 }))
 
@@ -68,14 +68,11 @@ app.post("/login", async (req, res) => {
     const [results] = await db.query('SELECT * FROM userTable WHERE username = ?', [username]);
     if (results.length > 0) {
       const user = results[0];
-      // console.log(user);
       const match = await bcrypt.compare(password, user.password);
       if (match) {
         req.session.is_logined = true;
         req.session.nickname = user.username;
-        // console.log(req.session.nickname);
         req.session.nickname2 = user.firstnameKana;
-        // console.log(req.session.nickname2);
         req.session.save(() => {
           sendData.isLogin = "True";
           res.send(sendData);
@@ -84,7 +81,7 @@ app.post("/login", async (req, res) => {
         // 로그 기록은 에러 무시하고 비동기 실행
         db.query(
           `INSERT INTO logtable (created, username, action, command, actiondetail) VALUES (NOW(), ?, 'login', ?, ?)`,
-          [username, '-', `React 로그인 테스트`]
+          [username, '-', 'テスト']
         ).catch(console.error);
 
       } else {
@@ -97,7 +94,7 @@ app.post("/login", async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    res.status(500).send({ error: '서버 오류' });
+    res.status(500).send({ error: 'ログインエラー' });
   }
 });
 
@@ -150,8 +147,6 @@ app.post("/signin", async (req, res) => {
   }
 
   try {
-    const [results] = await db.query('SELECT * FROM userTable WHERE username = ?', [username]);
-
     if (idavailable && pwavailable) {
       const hashedPassword = await bcrypt.hash(password, 10);
       await db.query(
@@ -160,7 +155,7 @@ app.post("/signin", async (req, res) => {
       );
       await db.query(
         'INSERT INTO userTickets (username, lesson_tickets, cancel_tickets) VALUES (?, ?, ?)',
-        [username, 1, 0]
+        [username, 1, 0] // 신규가입시 수강권 1개 무료지급
       );
       await new Promise((resolve) => req.session.save(resolve)); // 세션 저장 대기
       sendData.isSuccess = "True";
@@ -179,7 +174,7 @@ app.post("/signin", async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    res.status(500).send({ error: '서버 오류' });
+    res.status(500).send({ error: '会員登録サバ―エラー' });
   }
 });
 
@@ -196,10 +191,8 @@ app.get('/getAvailabilityTable', async (req, res) => {
   const dates = [];
   for (let i = 1; i < 15; i++) {
     const date = new Date(today);
-    // console.log("date:", date);
     date.setDate(today.getDate() + i);
     dates.push(date.toISOString().split('T')[0]);
-    // console.log("dates:", dates);
   }
 
   const placeholders = dates.map(() => '?').join(',');
@@ -217,7 +210,6 @@ app.get('/getAvailabilityTable', async (req, res) => {
 });
 
     const reservedSet = new Set(convertedRows.map(r => `${r.date}_${r.time}`));
-
     const result = [];
     dates.forEach(date => {
       timeSlots.forEach(time => {
@@ -229,11 +221,10 @@ app.get('/getAvailabilityTable', async (req, res) => {
         });
       });
     });
-
     res.json(result);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'DB 조회 중 오류 발생' });
+    res.status(500).json({ error: 'DB照会エラー' });
   }
 });
 
@@ -244,35 +235,29 @@ app.post('/reserve', async (req, res) => {
   if (!username) {
     return res.status(401).json({ success: false, message: 'ログインしてください。' });
   }
-
   if (!Array.isArray(slots) || slots.length === 0) {
     return res.status(400).json({ success: false, message: '予約の時間帯を選択して下さい。' });
   }
-
   const connection = await db.getConnection();
   try {
     await connection.beginTransaction();
-
     const [[user]] = await connection.query(
       'SELECT lesson_tickets FROM userTickets WHERE username = ?',
       [username]
     );
-
     if (!user) {
       throw new Error('ユーザー情報が見つかりません。');
     }
-
     if (user.lesson_tickets < slots.length) {
       throw new Error('受講券が不足しています。');
     }    
-
     for (const slot of slots) {
       const [rows] = await connection.query(
         'SELECT * FROM reservations WHERE date = ? AND time = ?',
         [slot.date, slot.time]
       );
       if (rows.length > 0) {
-        throw new Error(`${slot.date} ${slot.time} 은 이미 예약되었습니다.`);
+        throw new Error(`${slot.date} ${slot.time}は他のユーザーが既に予約しました。他の時間をお選びください。`);
       }
 
       await connection.query(
@@ -281,11 +266,10 @@ app.post('/reserve', async (req, res) => {
       );
     }
 
-      await connection.query(
-      'UPDATE userTickets SET lesson_tickets = lesson_tickets - ? WHERE username = ?',
-      [slots.length, username]
+    await connection.query(
+    'UPDATE userTickets SET lesson_tickets = lesson_tickets - ? WHERE username = ?',
+    [slots.length, username]
     );
-
 
     await connection.commit();
     res.json({ success: true });
@@ -305,10 +289,9 @@ app.get('/getUsername', (req, res) => {
   }
 });
 
-
 app.get('/getMyReservations', async (req, res) => {
   if (!req.session.is_logined || !req.session.nickname) {
-    return res.status(401).json({ error: '로그인이 필요합니다.' });
+    return res.status(401).json({ error: 'ログインしてください。' });
   }
 
   try {
@@ -319,7 +302,7 @@ app.get('/getMyReservations', async (req, res) => {
     res.json(rows);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'DB 조회 오류' });
+    res.status(500).json({ error: 'DB照会エラー' });
   }
 });
 
@@ -329,7 +312,7 @@ app.post('/cancelReservation', async (req, res) => {
   const username = req.session.nickname;
 
   if (!username) {
-    return res.status(401).json({ success: false, message: '로그인이 필요합니다.' });
+    return res.status(401).json({ success: false, message: 'ログインしてください。' });
   }
 
   try {
@@ -367,7 +350,7 @@ app.post('/cancelReservation', async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: 'DB 오류가 발생했습니다.' });
+    res.status(500).json({ success: false, message: 'DBエラー' });
   }
 });
 
@@ -408,7 +391,7 @@ app.get('/userTickets', async (req, res) => {
   const username = req.session.nickname;
 
   if (!username) {
-    return res.status(401).json({ success: false, message: '로그인이 필요합니다.' });
+    return res.status(401).json({ success: false, message: 'ログインしてください。' });
   }
 
   try {
@@ -418,7 +401,7 @@ app.get('/userTickets', async (req, res) => {
     );
 
     if (!userTickets) {
-      return res.status(404).json({ success: false, message: '사용자 티켓 정보가 없습니다.' });
+      return res.status(404).json({ success: false, message: 'チケットの情報がございません。' });
     }
 
     res.json({ 
@@ -428,7 +411,7 @@ app.get('/userTickets', async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: '서버 오류가 발생했습니다.' });
+    res.status(500).json({ success: false, message: 'チケットサーバーエラーエラー' });
   }
 });
 
@@ -436,7 +419,7 @@ app.post('/addTestTickets', async (req, res) => {
   const username = req.session.nickname;
 
   if (!username) {
-    return res.status(401).json({ success: false, message: '로그인이 필요합니다。' });
+    return res.status(401).json({ success: false, message: 'ログインしてください。' });
   }
 
   try {
@@ -447,13 +430,13 @@ app.post('/addTestTickets', async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: 'DB 오류가 발생했습니다。' });
+    res.status(500).json({ success: false, message: 'チケット回数エラー' });
   }
 });
 
 app.get('/sessioninfo', (req, res) => {
   console.log(req.session); // 서버 콘솔에 출력
-  res.json(req.session);    // 클라이언트에 응답
+  res.json(req.session);    
 });
 
 
@@ -488,7 +471,6 @@ app.get('/get-profile', async (req, res) => {
 
 app.post("/update-password", async (req, res) => {  
   const password = req.body.userPassword;
-  const password2 = req.body.userPassword2;
   const pwavailable = req.body.pwavailable;
   const sendData = { isSuccess: "" };
 
@@ -498,7 +480,6 @@ app.post("/update-password", async (req, res) => {
   } 
 
   try {
-    const [results] = await db.query('SELECT * FROM userTable WHERE username = ?', [req.session.nickname]);
 
     if (pwavailable) {
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -516,7 +497,7 @@ app.post("/update-password", async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    res.status(500).send({ error: '서버 오류' });
+    res.status(500).send({ error: 'パスワード変更エラー' });
   }
 });
 
@@ -525,10 +506,10 @@ app.post('/update-profile-info', async (req, res) => {
   const { lastnameKanji, firstnameKanji, lastnameKana, firstnameKana, phoneNumber } = req.body;
 
   if (!phoneNumber) {
-    return res.status(400).json({ message: 'あっちいけ' })
+    return res.status(400).json({ message: '電話番号を入力してください' })
   }  
   if (!lastnameKanji || !firstnameKanji || !lastnameKana || !firstnameKana) {
-    return res.status(400).json({ message: '이름을 입력해주세요' })
+    return res.status(400).json({ message: '氏名を入力してください' })
   }  
 
   await db.query(

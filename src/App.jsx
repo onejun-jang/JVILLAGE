@@ -4,7 +4,7 @@ import AdPage from './components/Adpage/IndexAdPage';
 import Login from './components/Userpage/Login';
 import Signin from './components/Userpage/Signin';
 import { Navigate } from 'react-router-dom';
-import Mypage from './components/Userpage/Mypage'; // 실제 파일 경로에 맞게 수정
+import Mypage from './components/Userpage/Mypage'; 
 
 
 
@@ -23,7 +23,7 @@ function App() {
   }, []); 
 
     if (isLogin === null) {
-    // 인증 확인 중이니 로딩 UI 표시 혹은 null 반환
+    // 인증 확인 중일때
     return <div>Loading...</div>;
   }
 
