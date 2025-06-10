@@ -46,11 +46,11 @@ export default function PriceComparisonTable() {
       <table className={styles.priceTable}>
         <thead>
           <tr>
-            <th className={styles.rowTitle}> </th>
+            <th className={styles.rowTitle}><div className={styles.heightControll}></div></th>
             <th className={classNames(styles.highlightTitle, styles.jvillageCell)}>J VILLAGE</th>
-            <th className={styles.nvillage}>A社</th>
-            <th className={styles.nvillage}>B社</th>
-            <th className={styles.nvillage}>C社</th>
+            <th className={styles.nvillage}><div className={styles.heightControll}>A社</div></th>
+            <th className={styles.nvillage}><div className={styles.heightControll}>B社</div></th>
+            <th className={styles.nvillage}><div className={styles.heightControll}>C社</div></th>
           </tr>
         </thead>
         <tbody>

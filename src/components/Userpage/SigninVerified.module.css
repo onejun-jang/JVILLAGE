@@ -1,0 +1,41 @@
+.layout{
+    position: relative; 
+    display: flex;
+    justify-content: center;
+    height:  100vh;
+    top: 15vh;
+}
+
+.loginImage{
+    height: 300px;
+}
+
+.content{
+    text-align: center;
+}
+
+.btn{
+    cursor: pointer;
+    font-size: 20px;
+    color: white;
+    font-weight: 800;
+    background-color: red;
+    border: 2px solid red;
+    border-radius: 5px;
+    width: 150px;
+    height: 50px;
+}
+
+.btn:hover{
+    color: white;
+    font-weight: 800;
+    background-color: red;
+    border: 2px solid red;
+    border-radius: 5px;
+    width: 150px;
+    height: 50px;
+    transform: translateY(-3px);
+    box-shadow: 8px 8px 10px rgba(0, 0, 0, 0.15);
+    transition: .2s;
+    
+}

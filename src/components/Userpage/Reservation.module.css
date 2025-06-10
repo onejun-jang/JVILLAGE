@@ -22,14 +22,72 @@ ul {
 .tableWrapper {
   overflow-x: auto;
   margin-top: 20px;
+  max-width: 100%;
+  overflow-y: auto;
 }
+
+.cancelBtn{
+  cursor: pointer;
+  border: 1px solid black;
+  border-radius: 3px;
+  background-color: #e0e0e0;
+}
+
+.cancelBtn:hover{
+  /* font-weight: 700; */
+  border: 2px solid black;
+  border-radius: 3px;
+  background-color: lightgrey;
+  transform: translateY(-1px);
+}
+
+.titleSet{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btnNextWeek,
+.btnPrevWeek{
+  margin-top: 30px;
+  padding: 10px 16px;
+  background-color: lightgray;
+  border: none;
+  border-radius: 5px;
+  transition:0.2s ease;
+  margin-top: 30px;
+  cursor: pointer;
+}
+
+/* .btnNextWeek,
+.btnPrevWeek {
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  background-color: lightgray;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition:0.3s ease;
+  margin-top: 30px;
+} */
+
+.btnNextWeek:not(:disabled):hover,
+.btnPrevWeek:not(:disabled):hover {
+  background-color: 	#b8b8b8;
+  font-weight: 700;
+  transform: translateY(-2px);
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
+} 
 
 .reservationTable {
   border-collapse: collapse;
   width: 100%;
-  min-width: 800px;
+  /* min-width: 800px; */
 }
 
+.reservationTable tr,
 .reservationTable th,
 .reservationTable td {
   border: 1px solid #ccc;
@@ -40,11 +98,15 @@ ul {
 
 .cell {
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color .4s ease;
 }
 
 .available {
   background-color: #ffe6f0;
+}
+
+.available:hover {
+  background-color: #ffccd9;
 }
 
 .unavailable {
@@ -56,14 +118,19 @@ ul {
 .selected {
   background-color: red !important;
   color: white;
-  font-weight: bold;
+  font-weight: 700;
+  font-size: 16px;
+  box-shadow: 8px 8px 8px black;
+  border-radius: 3px;
+  transform: translate(-2px,-2px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color .3s ease;
 }
 
 .reserveConfirm {
   margin-top: 20px;
   padding: 10px;
-  border: 1px solid #3399ff;
-  background-color: #f0f8ff;
+  border: 1px solid #ffccd9;
+  background-color: #fff0f5;
   border-radius: 5px;
 }
 
@@ -74,7 +141,7 @@ ul {
 
 .reserveConfirm button {
   padding: 8px 16px;
-  background-color: #3399ff;
+  background-color: red;
   color: white;
   border: none;
   border-radius: 4px;
@@ -82,7 +149,10 @@ ul {
 }
 
 .reserveConfirm button:hover {
-  background-color: #2377cc;
+  font-weight: 700;
+  transform: translateY(-2px);
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.15);
+  transition: 0.2s;
 }
 
 .statusWrapper {
@@ -104,4 +174,75 @@ ul {
 .reservedSection h2,
 .pastSection h2 {
   margin-top: 0;
+}
+
+
+@media (max-width: 768px) {
+  .reservationContainer {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  h2 {
+    font-size: 18px;
+    margin-top: 20px;
+    margin-bottom: 8px;
+  }
+
+  .btnNextWeek,
+  .btnPrevWeek{
+    margin-top: 20px;
+
+  }
+
+  .reservationTickets {
+    font-size: 14px;
+    margin-left: 5px;
+  }
+
+  .tableWrapper {
+    margin-top: 10px;
+    overflow-x: auto;
+  }
+
+  .reservationTable {
+    /* min-width: 600px; */
+    font-size: 12px;
+  }
+
+  .reservationTable th,
+  .reservationTable td {
+    padding: 6px;
+    font-size: 12px;
+  }
+
+  .selected {
+    font-size: 14px;
+    box-shadow: 4px 4px 6px black;
+  }
+
+  .reserveConfirm {
+    padding: 8px;
+    font-size: 14px;
+  }
+
+  .reserveConfirm button {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+
+  .statusWrapper {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .reservedSection,
+  .pastSection {
+    padding: 8px;
+  }
+
+  .reservedSection h2,
+  .pastSection h2 {
+    font-size: 16px;
+  }
 }

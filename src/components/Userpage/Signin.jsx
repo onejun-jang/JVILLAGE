@@ -16,12 +16,19 @@ function Signin() {
     const [isPWAvailable, setPWAvailable] = useState(null);  
     const [phonenumber, setPhonenumber] = useState("");
     const navigate = useNavigate();
+
     const IDcheck = () => {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(id)) {
+        setIdCheckMessage("メール形式で入力してください。");
+        setIsIdAvailable(false);
+        return; // 꼭 필요함, 안하면 밑에 fetch까지 진행되버림림
+      }
       const userData = {
         userId: id
       };
 
-      fetch("/signin/check", { 
+      fetch("/api/auth/signin/check", { 
         method: "post", 
         headers: {     
           "content-type": "application/json",
@@ -124,7 +131,7 @@ function Signin() {
                 pwavailable: isPWAvailable,
                 phoneNumber: phonenumber
               };
-              fetch("/signin", { 
+              fetch("/api/auth/signin", { 
                 method: "post", 
                 headers: {     
                   "content-type": "application/json",
@@ -134,17 +141,18 @@ function Signin() {
                 .then((res) => res.json())
                 .then((json) => {
                   if(json.isSuccess==="True"){
-                    alert('会員登録に成功しました。')
+                    alert('メールを送信しました。メールのリンクをクリックして登録を完了してください。')
                     navigate('/login');
                   }
                   else{
                     alert(json.isSuccess)
+                    
                   }
                 });
             }} /></p>
           </div>
       
-          <p><button onClick={() => {
+          <p><button style={{cursor : 'pointer'}} onClick={() => {
             navigate('/login');
           }}>ログイン</button>に戻る</p>
         </div>

@@ -6,7 +6,7 @@ const TicketManager = () => {
   const [cancelTickets, setCancelTickets] = useState(0);
 
   useEffect(() => {
-    fetch('/userTickets')
+    fetch('/api/tickets/userTickets')
       .then(res => res.json())
       .then(data => {
         if(data.success) {
@@ -16,12 +16,12 @@ const TicketManager = () => {
           alert('受講券読み込みエラー');
         }
       })
-      .catch(() => alert('サバ―エラー'));
+      .catch(() => alert('サーバ―エラー'));
   }, []);
 
   const handleBuyTicket = async () => {
     try {
-      const res = await fetch('/create-payment', { method: 'POST' });
+      const res = await fetch('/api/payment/create-payment', { method: 'POST' });
       const data = await res.json();
 
       if (data.success) {
@@ -39,7 +39,7 @@ const TicketManager = () => {
 
   const handleTestAdd = async () => {
     try {
-      const res = await fetch('/addTestTickets', {
+      const res = await fetch('/api/tickets/addTestTickets', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

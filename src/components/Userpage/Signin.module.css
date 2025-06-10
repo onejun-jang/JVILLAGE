@@ -103,7 +103,10 @@
 .loginID:focus,
 .loginPW:hover,
 .loginPW:active,
-.loginPW:focus {
+.loginPW:focus,
+.phone:active,
+.phone:focus,
+.phone:hover {
   outline: none;
   border-bottom-color: red;
 }

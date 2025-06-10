@@ -1,39 +1,66 @@
-
-.title{
-    white-space: nowrap;
-    font-size: clamp(24px, 5vw, 40px);
-    font-weight: 700;
-    text-align: center;
-    margin: clamp(24px, 4vw, 40px) 0 clamp(24px, 4vw, 70px) 0;
+.title {
+  white-space: nowrap;
+  font-size: clamp(24px, 5vw, 40px);
+  font-weight: 700;
+  text-align: center;
+  margin: clamp(24px, 4vw, 40px) 0 clamp(24px, 4vw, 70px) 0;
 }
 
-.substance{
-    text-align: center;
-    border: 4px solid black;
-    border-radius: 20px;
-    width: 50%;
-    min-width: 310px;
-    /* height: 400px; */
-    margin: 0 auto;
-    overflow: hidden;
+.substance {
+  text-align: left;
+  border: 4px solid black;
+  border-radius: 20px;
+  width: 80%;
+  max-width: 800px;
+  min-width: 310px;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
-ul{
-    padding-left: 0;
-    margin-left: 0;
+ul {
+  padding-left: 0;
+  margin-left: 0;
 }
-li{
-    list-style: none;
-    margin: 5%;
+
+li {
+  list-style: none;
+  margin-bottom: 40px;
+}
+
+.substance h3 {
+  font-size: clamp(18px, 4vw, 28px);
+  margin: 0 0 10px 0;
+  line-height: 1.3;
+}
+
+.substance p {
+  font-size: clamp(14px, 3.5vw, 18px);
+  line-height: 1.6;
+}
+
+/* 모바일 최적화 (아이폰13 기준 390px 이하) */
+@media screen and (max-width: 420px) {
+  .title {
+    white-space: normal;
+    font-size: 22px;
+    padding: 0 10px;
   }
 
-.substance h3{
-    font-size: clamp(14.6px, 2vw, 30px);
-    margin: -2% 0 ;
-    text-align: justify;
-}
+  .substance {
+    width: 90%;
+    padding: 16px;
+  }
 
-.substance p{
-    font-size: clamp(11px, 1.1vw, 30px);
-    text-align: justify;
+  .substance h3 {
+    font-size: 20px;
+  }
+
+  .substance p {
+    font-size: 15px;
+  }
+
+  li {
+    margin-bottom: 32px;
+  }
 }

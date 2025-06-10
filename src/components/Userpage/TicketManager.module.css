@@ -13,8 +13,8 @@
 }
 
 .ticketInfo {
-  font-size: 1.1rem;
-  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  margin-bottom: 1.2rem;
 }
 
 .highlightLesson {
@@ -35,15 +35,19 @@
 .buyButton {
   background-color: orange; 
   color: black;
+  font-size: 1vw;
   font-weight: bold;
   padding: 0.5rem 1rem;
   border-radius: 0.375rem;
   border: none;
   cursor: pointer;
+  transition: .2s ease;
 }
 
 .buyButton:hover {
-  background-color: yellow;
+  transform: translateY(-3px);
+  box-shadow: 8px 8px 10px rgba(0, 0, 0, 0.15);  
+  background-color: #FFB347;
 }
 
 .testButton {
@@ -57,4 +61,37 @@
 
 .testButton:hover {
   background-color: #a1a1aa;
+}
+
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+    margin: 1rem;
+  }
+
+  .title {
+    font-size: 1.2rem;
+    /* text-align: center; */
+  }
+
+  .ticketInfo {
+    font-size: 1.2rem;
+    /* text-align: center; */
+    margin-bottom: 1rem;
+  }
+
+  .buttonGroup {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .buyButton,
+  .testButton {
+    font-size: 1rem; /* 고정 px 단위를 사용해 작은 화면에서도 안정적 */
+    width: 100%;
+    max-width: 300px;
+    padding: 0.6rem 1rem;
+  }
 }

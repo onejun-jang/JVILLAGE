@@ -13,7 +13,7 @@ function Mypage({ setIsLogin }) {
 
 //인삿말
   useEffect(() => {
-    fetch('/getUsername',{
+    fetch('/api/profiles/getUsername',{
         credentials: 'include'
     })
       .then(res => res.json())
@@ -23,7 +23,7 @@ function Mypage({ setIsLogin }) {
   }, []);
 
   const handleLogout = () => {
-    fetch('/logout', {
+    fetch('/api/auth/logout', {
         credentials: 'include'
     })
       .then(() => {
@@ -32,28 +32,46 @@ function Mypage({ setIsLogin }) {
       });
   };
 
+  useEffect(() => {
+  const savedTab = localStorage.getItem('mypage-active-tab');
+  if (savedTab) {
+    setActiveTab(savedTab);
+  }
+  }, []);
+
+  const handleTabChange = (tab) => {
+  setActiveTab(tab);
+  localStorage.setItem('mypage-active-tab', tab);
+  };  
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.header}>
-        <div className={styles.welcome}>
-          {userName}様, 안녕하세요!
+        <div className={styles.headerLeft}> 
+          <span style={{ color: 'red', fontSize: '60px', fontWeight: 700, fontStyle: 'italic' }}>J   </span>
+          <span style={{ color: 'black', fontSize: '45px' }}>Village</span>
         </div>
-        <button className={styles.logoutBtn} onClick={handleLogout}>
-          ログアウト
-        </button>
+        <div className={styles.headerRight}> 
+          <div className={styles.welcome}>
+            {userName}様, 안녕하세요!
+          </div>
+          <button className={styles.logoutBtn} onClick={handleLogout}>
+            ログアウト
+          </button>
+        </div>
       </div>
 
       <div className={styles.container}>
         <div className={styles.sidebar}>
-          <button onClick={() => setActiveTab('reservation')}>予約管理</button>
-          <button onClick={() => setActiveTab('ticket')}>回数券管理</button>
-          <button onClick={() => setActiveTab('profile')}>個人情報修正</button>
+          <button onClick={() => handleTabChange('reservation')}>予約管理</button>
+          <button onClick={() => handleTabChange('ticket')}>回数券管理</button>
+          <button onClick={() => handleTabChange('profile')}>個人情報修正</button>
         </div>
 
         <div className={styles.content}>
           {activeTab === 'reservation' && <Reservation />}
           {activeTab === 'ticket' && <TicketManager />}
-          {activeTab === 'profile' && <ProfileEdit setIsLogin={setIsLogin} />}
+          {activeTab === 'profile' && <ProfileEdit setIsLogin={setIsLogin} setUserName={setUserName}/>}
         </div>
       </div>
     </div>

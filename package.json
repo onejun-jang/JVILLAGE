@@ -20,6 +20,7 @@
     "express-mysql-session": "^3.0.3",
     "express-session": "^1.18.1",
     "mysql2": "^3.13.0",
+    "nodemailer": "^7.0.3",
     "nodemon": "^3.1.9",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -28,7 +29,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "set PORT=3000 && react-scripts start",
+    "start": "set DANGEROUSLY_DISABLE_HOST_CHECK=true && react-scripts start --host 0.0.0.0",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

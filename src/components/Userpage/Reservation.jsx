@@ -1,5 +1,6 @@
 import styles from './Reservation.module.css';
 import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import dayjs from 'dayjs';
 
 function Reservation() {
@@ -9,10 +10,11 @@ function Reservation() {
   const [selectedSlots, setSelectedSlots] = useState([]); // 배열 변경용
   const [lessonTickets, setLessonTickets] = useState(0);
   const [cancelTickets, setCancelTickets] = useState(0);
+  const [startOffset, setStartOffset] = useState(1);
 
   const fetchLessonTickets = async () => {
     try {
-      const res = await fetch('/userTickets', { credentials: 'include' });
+      const res = await fetch('/api/tickets/userTickets', { credentials: 'include' });
       const data = await res.json();
       setLessonTickets(data.lessonTickets);
     } catch (error) {
@@ -23,7 +25,7 @@ function Reservation() {
   
   const fetchCancelTickets = async () => {
     try {
-      const res = await fetch('/userTickets', { credentials: 'include' });
+      const res = await fetch('/api/tickets/userTickets', { credentials: 'include' });
       const data = await res.json();
       setCancelTickets(data.cancelTickets);
     } catch (error) {
@@ -38,17 +40,21 @@ function Reservation() {
 
   
 
-  // 다음날부터 +14일까지로 일단 설정
-  const getNext14Days = () => {
+
+  const getNext7Days = (offset = 1) => {
     const dates = [];
     const today = new Date();
-    for (let i = 1; i < 15; i++) {
+    for (let i = 0; i < 7; i++) {
       const d = new Date(today);
-      d.setDate(today.getDate() + i);
-      dates.push(d.toISOString().split('T')[0]); // YYYY-MM-DD, 나중에 dayjs로 변경하는게 나을듯듯
+      d.setDate(today.getDate() + offset + i);
+      dates.push(d.toISOString().split('T')[0]);
     }
     return dates;
   };
+
+  
+
+  
 
   const timeSlots = [
     '10:00', '10:30', '11:00', '11:30',
@@ -62,15 +68,15 @@ function Reservation() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const reservedRes = await fetch('/getMyReservations', { credentials: 'include' });
+        const reservedRes = await fetch('/api/reservation/getMyReservations', { credentials: 'include' });
         const reservedData = await reservedRes.json();
         setReserved(reservedData);
 
-        const pastRes = await fetch('/getMyPastReservations', { credentials: 'include' });
+        const pastRes = await fetch('/api/reservation/getMyPastReservations', { credentials: 'include' });
         const pastData = await pastRes.json();
         setPastReservations(pastData);
 
-        const availRes = await fetch('/getAvailabilityTable', { credentials: 'include' });
+        const availRes = await fetch('/api/reservation/getAvailabilityTable', { credentials: 'include' });
         const availData = await availRes.json();
         setAvailabilityTable(availData);
       } catch (error) {
@@ -97,7 +103,7 @@ function Reservation() {
     if (!window.confirm(`選択した${selectedSlots.length}件の予約を確定しますか？`)) return;
 
     try {
-      const res = await fetch('/reserve', {
+      const res = await fetch('/api/reservation/reserve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ slots: selectedSlots }),
@@ -109,11 +115,11 @@ function Reservation() {
       if (data.success) {
         alert('予約が成功しました。キャンセルは前日の22時までです。');
 
-        const reservedRes = await fetch('/getMyReservations', { credentials: 'include' });
+        const reservedRes = await fetch('/api/reservation/getMyReservations', { credentials: 'include' });
         const reservedData = await reservedRes.json();
         setReserved(reservedData);
 
-        const availRes = await fetch('/getAvailabilityTable', { credentials: 'include' });
+        const availRes = await fetch('/api/reservation/getAvailabilityTable', { credentials: 'include' });
         const availData = await availRes.json();
         setAvailabilityTable(availData);
 
@@ -132,7 +138,7 @@ function Reservation() {
     if (!window.confirm(`${date} ${time} の予約をキャンセルしますか？`)) return;
 
     try {
-      const res = await fetch('/cancelReservation', {
+      const res = await fetch('/api/reservation/cancelReservation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ date, time }),
@@ -143,11 +149,11 @@ function Reservation() {
       if (data.success) {
         alert('予約がキャンセルされました。');
 
-        const reservedRes = await fetch('/getMyReservations', { credentials: 'include' });
+        const reservedRes = await fetch('/api/reservation/getMyReservations', { credentials: 'include' });
         const reservedData = await reservedRes.json();
         setReserved(reservedData);
 
-        const availRes = await fetch('/getAvailabilityTable', { credentials: 'include' });
+        const availRes = await fetch('/api/reservation/getAvailabilityTable', { credentials: 'include' });
         const availData = await availRes.json();
         setAvailabilityTable(availData);
 
@@ -159,17 +165,17 @@ function Reservation() {
       }
     } catch (error) {
       console.error(error);
-      alert('サバ―エラーにより予約キャンセルに失敗しました。');
+      alert('サーバ―エラーにより予約キャンセルに失敗しました。');
     }
   };
 
-  const dateHeaders = getNext14Days();
+  const dateHeaders = useMemo(() => getNext7Days(startOffset), [startOffset]);
 
   return (
     <div className={styles.reservationContainer}>
       <div className={styles.statusWrapper}>
         <div className={styles.reservedSection}>
-          <h2 style={{marginLeft: '10px'}}>予約状況<span className={styles.reservationTickets}>(残余受講件:{lessonTickets}、 残余キャンセル券:{cancelTickets})</span></h2>
+          <h2 style={{marginLeft: '10px'}}>予約状況<span className={styles.reservationTickets}>(受講件:{lessonTickets}、 キャンセル券:{cancelTickets})</span></h2>
           <ul>
             {reserved.filter(item => {
               const now = new Date();
@@ -198,12 +204,7 @@ function Reservation() {
                       <span>{item.date} - {item.time}</span>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {!isPastCancelDeadline && (
-                          <button
-                            onClick={() => handleCancel(item.date, item.time)}
-                            style={{ cursor: 'pointer' }}
-                          >
-                            取消
-                          </button>
+                          <button className={styles.cancelBtn} onClick={() => handleCancel(item.date, item.time)}>取消</button>
                         )}
                         {isPastCancelDeadline && (
                           <span style={{ fontSize: '0.85em', color: '#888' }}>*前日の22時過ぎてキャンセル不可</span>
@@ -235,12 +236,28 @@ function Reservation() {
         </div>
       </div>
 
-      <h2>スケジュール一覧</h2>
+      <div className={styles.titleSet}>
+        <h2>スケジュール一覧</h2>
+        <div>
+          <button className={styles.btnNextWeek}
+            onClick={() => setStartOffset(prev => Math.max(1, prev - 7))}
+            disabled={startOffset === 1}
+          >
+            ⮜ 前の週
+          </button>
+          <button className={styles.btnPrevWeek}
+            onClick={() => setStartOffset(prev => (prev + 7 <= 28 ? prev + 7 : prev))}
+            disabled={startOffset + 7 > 28}
+          >
+            次の週 ⮞
+          </button>
+        </div>
+      </div>
       <div className={styles.tableWrapper}>
         <table className={styles.reservationTable}>
           <thead>
             <tr>
-              <th>時</th>
+              <th></th>
               {dateHeaders.map(date => (
                 <th key={date}>{date.slice(5)}</th>
               ))}
@@ -263,7 +280,7 @@ function Reservation() {
                         ${isSelected ? styles.selected : ''}`}
                       onClick={() => isAvailable && handleCellClick(date, time)}
                     >
-                      {isAvailable ? '○' : '×'}
+                      {isAvailable ? '〇' : '✕'}
                     </td>
                   );
                 })}

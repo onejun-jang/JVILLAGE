@@ -2,7 +2,7 @@
     position: fixed;
     width: 100%;
     top:0;
-    z-index: 2000;
+    z-index: 20000;
 }
 
 .substance{
@@ -19,8 +19,9 @@
     display: flex;
     justify-content: space-evenly;
     text-align: center;
-    padding: 10px 0px;
+    padding: 5px 0px;
     width: 35%;
+    height: 90%;
     min-width: 300px;
     border: 3px solid red;
     border-radius: 20px;
@@ -28,11 +29,24 @@
 }
 
 .navbtn{
+    cursor: pointer;
     border: none;
     background-color: transparent;
     height: auto;
     font-size: 20px;
     font-weight: 700;
+    padding: 2px;
+    transition: 0.2s ease;
+}
+
+.navbtn:hover{
+    padding: 0 15px 0 15px;
+    border: solid 1px red;
+    border-radius: 10px;
+    background-color: red;
+    color: white;
+    
+
 }
 
 .slash{
@@ -40,11 +54,67 @@
 }
 
 .navlogin{
+    cursor: pointer;
     border: none;
     background-color: transparent;
     color: gray;
     font-weight: 500;
     height: auto;
     font-size: 15px;
+    transition: 0.2s ease;
 }
 
+.navlogin:hover{
+    padding: 10px 10px 10px 10px;
+    font-size: 15px;
+    border: solid 1px gray;
+    border-radius: 5px;
+    background-color: gray;
+    color: white;
+    
+}
+
+
+
+@media (max-width: 768px) {
+  .substance {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 15px 10px;
+    gap: 20px;
+  }
+
+  .navselector {
+    width: 50%;
+    /* flex-direction: column; */
+    border-width: 2px;
+    padding: 10px 0;
+    margin: 10px 0 10px 25px;
+    min-width: unset;
+  }
+
+  .navbtn {
+    font-size: 18px;
+    padding: 8px;
+  }
+
+  .slash {
+    display: none;
+  }
+
+  .navlogin {
+    font-size: 16px;
+    margin-top: 10px;
+  }
+
+  /* 로고 텍스트 조절 */
+  .substance > div span:nth-child(1) {
+    font-size: 40px; /* J */
+  }
+
+  .substance > div span:nth-child(2) {
+    display: none; /* Village */
+  }
+}

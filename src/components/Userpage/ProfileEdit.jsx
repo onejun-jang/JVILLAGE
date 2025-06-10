@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './ProfileEdit.module.css';
 
-function ProfileEdit({ setIsLogin }) {
+function ProfileEdit({ setIsLogin, setUserName}) {
   const [step, setStep] = useState('verify'); // verify, edit같은게 있다고 함함
   const [password, setPassword] = useState('');
   const [password2, setPassword2] = useState('');  
@@ -34,7 +34,7 @@ function ProfileEdit({ setIsLogin }) {
     }, [password, password2]);
 
   const handleVerify = async () => {
-    const res = await fetch('/verify-password', {
+    const res = await fetch('/api/profiles/verify-password', {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -45,7 +45,7 @@ function ProfileEdit({ setIsLogin }) {
       setStep('edit');
 
       // 사용자 정보도 불러오기
-      const res2 = await fetch('/get-profile', { credentials: 'include' });
+      const res2 = await fetch('/api/profiles/get-profile', { credentials: 'include' });
       const data = await res2.json();
       setUserData(data);
     } else {
@@ -61,7 +61,7 @@ function ProfileEdit({ setIsLogin }) {
   };
 
   const handleInfoSubmit = async () => {
-    const res = await fetch('/update-profile-info', {
+    const res = await fetch('/api/profiles/update-profile-info', {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -69,6 +69,10 @@ function ProfileEdit({ setIsLogin }) {
     });
 
   if (res.ok) {
+    const data = await res.json();  // ← 서버에서 newUsername 받아오기
+    if (setUserName) {
+      setUserName(data.newUsername);  // ← 상태 업데이트
+    }
     setInfoMessage('個人情報変更が完了しました。');
   } else {
     const data = await res.json();  // 에러 메시지 읽기
@@ -81,7 +85,7 @@ function ProfileEdit({ setIsLogin }) {
       {step === 'verify' && (
         <>
           <h3>パスワード確認</h3>
-          <input
+          <input className={styles.form}
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -95,7 +99,7 @@ function ProfileEdit({ setIsLogin }) {
       {step === 'edit' && (
         <>
           <h3>パスワード変更</h3>
-          <input
+          <input className={styles.form}
             type="password"
             name="password"
             placeholder="新規パスワード"
@@ -103,7 +107,7 @@ function ProfileEdit({ setIsLogin }) {
               setPassword(event.target.value);
             }}
           />
-          <input
+          <input className={styles.form}
             type="password"
             name="password2"
             placeholder="パスワード確認"
@@ -121,7 +125,7 @@ function ProfileEdit({ setIsLogin }) {
                 userPassword2: password2,
                 pwavailable: isPWAvailable
               };
-              fetch("/update-password", { 
+              fetch("/api/profiles/update-password", { 
                 method: "post", 
                 headers: {     
                   "content-type": "application/json",
@@ -132,7 +136,7 @@ function ProfileEdit({ setIsLogin }) {
                 .then((json) => {
                   if(json.isSuccess==="True"){
                     alert('会員登録に成功しました。再ログインしてください。')
-                    fetch('/logout', { credentials: 'include' }).then(() => {
+                    fetch('/api/auth/logout', { credentials: 'include' }).then(() => {
                     setIsLogin(false);
                     navigate('/login');
                             })}
@@ -145,35 +149,35 @@ function ProfileEdit({ setIsLogin }) {
           <hr />
 
           <h3>個人情報変更</h3>
-          <input
+          <input className={styles.form}
             type="text"
             name="phoneNumber"
             value={userData.phoneNumber}
             placeholder="電話番号"
             onChange={handleUserChange}
           />          
-          <input
+          <input className={styles.form}
             type="text"
             name="lastnameKanji"
             value={userData.lastnameKanji}
             placeholder="氏(漢字)"
             onChange={handleUserChange}
           />
-          <input
+          <input className={styles.form}
             type="text"
             name="firstnameKanji"
             value={userData.firstnameKanji}
             placeholder="名(漢字)"
             onChange={handleUserChange}
           />
-          <input
+          <input className={styles.form}
             type="text"
             name="lastnameKana"
             value={userData.lastnameKana}
             placeholder="氏(カナ)"
             onChange={handleUserChange}
           />
-          <input
+          <input className={styles.form}
             type="text"
             name="firstnameKana"
             value={userData.firstnameKana}

@@ -4,7 +4,8 @@
   }
   
 .priceTable {
-  width: 60%;
+  text-align: center;
+  width: 88%;
   border-collapse: collapse;
   font-size: clamp(10px,1.5vh,20px);
   min-width: 600px;
@@ -17,6 +18,7 @@ th{
 }
 
 
+
 th.jvillageCell{
   border-radius: 10px 10px 0 0;
   height: 5vh;
@@ -25,8 +27,10 @@ th.jvillageCell{
 }
 
 tr:nth-child(n+1):nth-child(-n+4) td {
+  /* border: 1px solid #ccc; */
   border-bottom: 1px solid 	#d3d3d3;
   border-left: none;
+  border-top: none;
 }
 
 tr:nth-child(n+1):nth-child(-n+4) td.jvillageCell{
@@ -56,15 +60,30 @@ th.rowTitle {
    border-bottom: 2px double #d3d3d3;
 }
 
-
-th.nvillage,
 td.nvillage{
   height: 4vh;
-  width:clamp(40px,0.8vh,100px)
+  width:clamp(40px,0.8vh,100px);
+}
+
+th.nvillage{
+  border-top: transparent;
+  padding: 1px 0 1px 0;
+  height: 4vh;
+  width: clamp(40px,0.8vh,100px);
+}
+
+.heightControll{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-top: 1px solid #d3d3d3;
+  /* border-right: 1px solid #d3d3d3; */
+  height: 80%;
+  width: 100%;
 }
 
 .note{
+  padding-left: 7%;
   margin-top: 15px;
   font-size: 12px;
 }
-
