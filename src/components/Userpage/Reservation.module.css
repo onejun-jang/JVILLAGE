@@ -171,6 +171,11 @@ ul {
   background-color: #f9f9f9;
 }
 
+.ulHeight{
+  max-height: 200px;
+  overflow-y: auto;
+}
+
 .reservedSection h2,
 .pastSection h2 {
   margin-top: 0;

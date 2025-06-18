@@ -176,7 +176,7 @@ function Reservation() {
       <div className={styles.statusWrapper}>
         <div className={styles.reservedSection}>
           <h2 style={{marginLeft: '10px'}}>予約状況<span className={styles.reservationTickets}>(受講件:{lessonTickets}、 キャンセル券:{cancelTickets})</span></h2>
-          <ul>
+          <ul className={styles.ulHeight}>
             {reserved.filter(item => {
               const now = new Date();
               const reservationDateTime = new Date(`${item.date}T${item.time}:00`);
@@ -219,7 +219,7 @@ function Reservation() {
 
         <div className={styles.pastSection}>
           <h2 style={{marginLeft: '10px'}}>受講履歴</h2>
-          <ul>
+          <ul className={styles.ulHeight}>
             {pastReservations.length === 0 ? (
               <li>受講履歴がありません。</li>
             ) : (
